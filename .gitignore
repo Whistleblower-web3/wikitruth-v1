@@ -1,0 +1,21 @@
+node_modules
+.env
+.env.example
+.env.local
+
+coverage
+coverage.json
+typechain
+typechain-types
+
+# cursor files
+.cursor/
+
+# Hardhat files
+cache/
+artifacts/
+ignition/
+
+# other files
+private/
+tasks/
