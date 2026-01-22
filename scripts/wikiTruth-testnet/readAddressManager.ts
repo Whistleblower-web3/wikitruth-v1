@@ -1,16 +1,12 @@
 import { ethers } from "hardhat";
-import {
-    user_evm_WikiTruth
-} from "../../WikiTruth_account";
 import { wikiTruth_contracts_address } from "../utils/wikiTruth_contracts_address";
-import { v3_core_testnet_address, v3_periphery_testnet_address } from "../utils/v3_testnet_address";
 // import { domainList } from "../../test/utils";
 
 /**
  * 
  * @returns Read WikiTruth contract data
  * 
- * Run command: npx hardhat run scripts/wikiTruth-testnet/readAddressManager.ts --network sapphire-testnet
+ * npx hardhat run scripts/wikiTruth-testnet/readAddressManager.ts --network sapphire-testnet
  */
 
 async function main() {
@@ -23,7 +19,6 @@ async function main() {
         console.error("Current network ID is not 23295, please check network ID");
         return;
     }
-
 
     console.log("\n3. Setting data for each contract...");
     console.log("   3.1 Reading AddressManager...");
