@@ -16,7 +16,7 @@
 pragma solidity ^0.8.24;
 
 import {IAddressManager} from "@marketplace-v1/interfaces/IAddressManager.sol";
-import {ProxyUpgrade} from "../../proxy/ProxyUpgrade.sol";
+import {ProxyUpgrade} from "../proxy/ProxyUpgrade.sol";
 
 /**
  * @title Modifier
@@ -61,23 +61,21 @@ contract Modifier is ProxyUpgrade {
         _;
     }
 
-    modifier onlyProjectContract() {
-        if (!ADDR_MANAGER.isProjectContract(msg.sender)) {
-            revert InvalidCaller();
-        }
-        _;
-    }
-
-    // =====================================================================================
-
     modifier onlyAdminDAO() {
         if (msg.sender != ADDR_MANAGER.dao() && msg.sender != admin())
             revert NotAdminOrDAO();
         _;
     }
 
-    modifier checkSetCaller() {
+    modifier onlyManager() {
         if (msg.sender != address(ADDR_MANAGER) && msg.sender != admin()) {
+            revert InvalidCaller();
+        }
+        _;
+    }
+
+    modifier onlyProjectContract() {
+        if (!ADDR_MANAGER.isProjectContract(msg.sender)) {
             revert InvalidCaller();
         }
         _;
