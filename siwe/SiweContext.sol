@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
+// OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/ERC721.sol)
 
 /**
  *         ██╗    ██╗██╗██╗  ██╗██╗    ████████╗██████╗ ██╗   ██╗████████╗██╗  ██╗
@@ -15,47 +16,38 @@
 
 pragma solidity ^0.8.24;
 
-import {IUserManager} from "@marketplace-v1/interfaces/IUserManager.sol";
-import {IFundManager} from "@marketplace-v1/interfaces/IFundManager.sol";
-import {IExchange} from "@marketplace-v1/interfaces/IExchange.sol";
-import {IAddressManager} from "@marketplace-v1/interfaces/IAddressManager.sol";
+import {ISiweAuth} from "./interfaces/ISiweAuth.sol";
 
-import {ModifierV2} from "../modifier/ModifierV2.sol";
 /**
- *  @notice TruthBox01
- *  This contract defines the basic variables and functions of TruthBox
+ *  @notice SiweContext contract
+ *  Implement basic Siwe functions
  */
 
-contract TruthBox01 is ModifierV2 {
-    uint8 internal _incrementRate; // 2.0 * 100
+contract SiweContext {
+    /// Invalid token error
+    error InvalidToken();
+    // ISiweAuth internal SIWE_AUTH;
 
-    uint256 internal _nextBoxId;
+    // constructor(address siweAuth_) {
+    //     SIWE_AUTH = ISiweAuth(siweAuth_);
+    // }
+    constructor() {}
 
-    // ==================================================================================================
-    constructor(address addrManager_) ModifierV2(addrManager_) {
-        _incrementRate = 200;
-    }
-
-    // ==========================================================================================================
     /**
-     * @dev Set the increment rate
-     * @param rate_ The increment rate
-     * Default: 200 (200%)
+     * @notice verify the sender is correct
+     * @param siweToken_ The siwe token of the user
+     * @return The sender of the function
+     * In sapphire, msg.sender is the zero address, so we need to get sender through siweToken_
      */
-    function setIncrementRate(uint8 rate_) external onlyDAO {
-        if (rate_ == 0 || rate_ > 200) revert InvalidRate();
-        _incrementRate = rate_;
-    }
-
-    // ==========================================================================================================
-    //                                      Getter Functions
-    // ==========================================================================================================
-
-    function incrementRate() external view returns (uint8) {
-        return _incrementRate;
-    }
-
-    function nextBoxId() external view returns (uint256) {
-        return _nextBoxId;
+    function _msgSenderSiwe(
+        address siweContract_,
+        bytes memory siweToken_
+    ) internal view returns (address) {
+        address sender = msg.sender;
+        if (sender == address(0)) {
+            sender = ISiweAuth(siweContract_).getMsgSender(siweToken_);
+            if (sender == address(0)) revert InvalidToken();
+        }
+        return sender;
     }
 }

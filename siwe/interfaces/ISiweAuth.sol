@@ -15,52 +15,55 @@
 
 pragma solidity ^0.8.24;
 
-// import {IUserManager} from "@marketplace-v1/interfaces-eth/IUserManager.sol";
-// import {IFundManager} from "@marketplace-v1/interfaces/IFundManager.sol";
-// import {IExchange} from "@marketplace-v1/interfaces-eth/IExchange.sol";
-import {Error} from "@marketplace-v1/interfaces/interfaceError.sol";
 import {
-    IAddressManager
-} from "@marketplace-v1/interfaces-eth/IAddressManager.sol";
+    SignatureRSV
+} from "@oasisprotocol/sapphire-contracts/contracts/auth/A13e.sol";
 
-import {ModifierV2} from "../modifier/ModifierV2.sol";
-/**
- *  @notice TruthBoxBase
- *
- */
+interface ISiweAuth {
+    /**
+     * @notice Use SIWE message and signature to login
+     * @param siweMsg The signed SIWE message
+     * @param sig The signature of the SIWE message
+     * @return authToken_ The encrypted authentication token
+     */
+    function login(
+        string calldata siweMsg,
+        SignatureRSV calldata sig
+    ) external view returns (bytes memory authToken_);
 
-contract TruthBoxBase is ModifierV2 {
-    uint8 internal _incrementRate; // 2.0 * 100
-
-    // ==================================================================================================
-    uint256 internal _nextBoxId;
-
-    // ==================================================================================================
-    constructor(address addrManager_) ModifierV2(addrManager_) {
-        _incrementRate = 200;
-    }
-
-    // ==========================================================================================================
+    function getMsgSender(bytes memory token_) external view returns (address);
 
     /**
-     * @dev Set the increment rate
-     * @param rate_ The increment rate
-     * Default: 200 (200%)
+     * @dev Check if the domain is valid
+     * @param domainToCheck The domain to check
+     * @return Whether the domain is valid
      */
-    function setIncrementRate(uint8 rate_) external onlyDAO {
-        if (rate_ == 0 || rate_ > 200) revert InvalidRate();
-        _incrementRate = rate_;
-    }
+    function isDomainValid(
+        string calldata domainToCheck
+    ) external view returns (bool);
 
-    // ==========================================================================================================
-    //                                      Getter Functions
-    // ==========================================================================================================
+    /**
+     * @dev Set the new admin
+     * @param newAdmin The new admin address
+     */
+    function setAdmin(address newAdmin) external;
 
-    function incrementRate() external view returns (uint8) {
-        return _incrementRate;
-    }
+    /**
+     * @dev Check if the session is valid
+     * @param token The authentication token
+     * @return Whether the session is valid
+     */
+    function isSessionValid(bytes memory token) external view returns (bool);
 
-    function nextBoxId() external view returns (uint256) {
-        return _nextBoxId;
-    }
+    /**
+     * @notice Return the domain associated with the dApp (return the main domain, keep backward compatibility)
+     * @return The domain string
+     */
+    function domain() external view returns (string memory);
+
+    /**
+     * @dev Get all supported domains
+     * @return The domain array
+     */
+    function allDomains() external view returns (string[] memory);
 }
