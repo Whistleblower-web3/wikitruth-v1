@@ -57,7 +57,7 @@ export const waitForBlocks = async (blockCount: number): Promise<void> => {
     const targetBlock = currentBlock + blockCount;
     
     while (await ethers.provider.getBlockNumber() < targetBlock) {
-        await sleep(1000); // Wait 1 second后再检查
+        await sleep(1000); // Wait 1 second 
     }
     
     console.log(`✅ Waited for ${blockCount} blocks`);

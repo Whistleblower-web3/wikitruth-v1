@@ -1,6 +1,6 @@
 /**
- * Test fixture module index file
- * Unified export of all test-related modules
+ * Test fixture index file
+ * export all test related modules
  */
 
 const { deployContracts } = require("./contracts");
@@ -18,16 +18,16 @@ const {
 } = require("./initialization");
 
 module.exports = {
-  // Contract deployment
+  // Contract Deployment
   deployContracts,
   
-  // Connector creation
+  // Connector Creation
   createConnectors,
   
-  // Token configuration
+  // Token Configuration
   configureTokens,
   
-  // Initialization configuration
+  // Initialization Configuration
   initializeContracts,
   generateTestData,
   createTestTruthBoxes,
@@ -37,7 +37,7 @@ module.exports = {
   otherRewardRate,
   slippageProtection,
   
-  // Utility functions
+  // Utils
   utils: {
     generateTestData,
     createTestTruthBoxes

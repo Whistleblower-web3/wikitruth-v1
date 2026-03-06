@@ -1,25 +1,31 @@
+/**
+ * Contract Connectors Module
+ * and create contract connectors for different users
+ */
 
 async function createConnectors(signers, contracts) {
+
   const {
     admin, admin2, dao, governance, minter, 
     seller, buyer, buyer2, completer, other, 
-    other2, dao_fund_manager, siweAuth
+    other2, dao_fund_manager, forwarder,
+    siweAuth, // replace SiweAuth contract, because eth version does not use SiweAuth
   } = signers;
 
   const {
     addressManager,
-    officialToken,
-    testToken,
-    otherToken,
-    otherToken2,
-    truthNFT,
+    settlementToken,
+    wBTC,
+    wETH,
+    wROSE,
     truthBox,
     swapContract,
     fundManager,
     exchange,
-    userId
+    userManager
   } = contracts;
 
+  // TruthBox Connectors
   const truthBoxConnectors = {
     other: truthBox.connect(other),
     minter: truthBox.connect(minter),
@@ -27,13 +33,7 @@ async function createConnectors(signers, contracts) {
     buyer: truthBox.connect(buyer)
   };
 
-  const truthNFTConnectors = {
-    minter: truthNFT.connect(minter),
-    other: truthNFT.connect(other),
-    buyer: truthNFT.connect(buyer),
-    dao: truthNFT.connect(dao)
-  };
-
+  // Exchange Connectors
   const exchangeConnectors = {
     minter: exchange.connect(minter),
     dao: exchange.connect(dao),
@@ -44,12 +44,14 @@ async function createConnectors(signers, contracts) {
     other: exchange.connect(other)
   };
 
-  const userIdConnectors = {
-    buyer: userId.connect(buyer),
-    minter: userId.connect(minter),
-    dao: userId.connect(dao)
+  // UserManager Connectors
+  const userManagerConnectors = {
+    buyer: userManager.connect(buyer),
+    minter: userManager.connect(minter),
+    dao: userManager.connect(dao)
   };
 
+  // FundManager Connectors
   const fundManagerConnectors = {
     minter: fundManager.connect(minter),
     buyer: fundManager.connect(buyer),
@@ -59,22 +61,24 @@ async function createConnectors(signers, contracts) {
     completer: fundManager.connect(completer)
   };
 
+  // Token Connectors
   const tokenConnectors = {
-    officialToken: {
-      buyer: officialToken.connect(buyer),
-      buyer2: officialToken.connect(buyer2),
-      other: officialToken.connect(other),
-      other2: officialToken.connect(other2),
-      minter: officialToken.connect(minter)
+    settlementToken: {
+      buyer: settlementToken.connect(buyer),
+      buyer2: settlementToken.connect(buyer2),
+      other: settlementToken.connect(other),
+      other2: settlementToken.connect(other2),
+      minter: settlementToken.connect(minter)
     },
-    testToken: {
-      minter: testToken.connect(minter),
-      buyer: testToken.connect(buyer),
-      buyer2: testToken.connect(buyer2),
-      other: testToken.connect(other)
+    wBTC: {
+      minter: wBTC.connect(minter),
+      buyer: wBTC.connect(buyer),
+      buyer2: wBTC.connect(buyer2),
+      other: wBTC.connect(other)
     }
   };
 
+  // SwapContract Connectors
   const swapContractConnectors = {
     minter: swapContract.connect(minter),
     buyer: swapContract.connect(buyer),
@@ -83,9 +87,8 @@ async function createConnectors(signers, contracts) {
 
   return {
     truthBoxConnectors,
-    truthNFTConnectors,
     exchangeConnectors,
-    userIdConnectors,
+    userManagerConnectors,
     fundManagerConnectors,
     tokenConnectors,
     swapContractConnectors

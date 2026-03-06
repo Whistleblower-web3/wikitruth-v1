@@ -1,6 +1,6 @@
 /**
- * Initialization configuration module
- * Responsible for contract initial parameter settings and address configuration
+ * Initialization Configuration Module
+ * responsible for setting initial parameters and address configuration for contracts
  */
 
 const crypto = require('crypto');
@@ -16,41 +16,48 @@ async function initializeContracts(contracts, connectors, signers) {
   const {
     addressManager,
     truthBox,
-    truthNFT,
     exchange,
     fundManager,
     swapContract,
-    userId
+    userManager,
+    settlementToken,
+    wBTC,
   } = contracts;
 
   const {
     truthBoxConnectors,
     exchangeConnectors,
     fundManagerConnectors,
-    truthNFTConnectors
   } = connectors;
 
-  // Get required signers from the passed signers
+  // Get the needed signers from the passed signers
   const {
-    dao, governance, dao_fund_manager, siweAuth,quoter
+    dao, governance, dao_fund_manager, siweAuth, quoter, forwarder
   } = signers;
 
   const addressList = [
     dao.address,
     governance.address,
     dao_fund_manager.address,
-    userId.target, 
-    siweAuth.address, // NOTE: For local testing, use address to replace siweAuth token contract address.
+    userManager.target, 
+    siweAuth.address, // NOTE: local test, use address to replace siweAuth token contract address.
     truthBox.target, 
-    truthNFT.target,
     exchange.target, 
     fundManager.target, 
+    forwarder.address
+  ];
+
+  const swapContracts = [ 
     swapContract.target,
     quoter.address
   ];
   
   await addressManager.setAddressList(addressList);
+  await addressManager.setSwapContracts(swapContracts);
   await addressManager.setAllAddress();
+  // In tokenConfig.js, set the settlement token and add token
+  // await addressManager.setSettlementToken(settlementToken.target);
+  // await addressManager.addToken(wBTC.target);
 
   // Set initial parameters
   await truthBoxConnectors.dao.setIncrementRate(incrementRate);
@@ -61,10 +68,7 @@ async function initializeContracts(contracts, connectors, signers) {
   await fundManagerConnectors.dao.setHelperRewardRate(otherRewardRate);
   // await fundManagerConnectors.dao.setSlippageProtection(slippageProtection);
 
-  // Set NFT network configuration
-  await truthNFT.setNetwork("ipfs://", "fleek.app");
-
-  // Generate random data for testing
+  // Generate test data
   const testData = generateTestData();
 
   // Create test TruthBox projects
@@ -96,12 +100,12 @@ async function createTestTruthBoxes(truthBoxMinter, testData) {
   const minter = signers[4]; // minter is the 5th signer
 
   // Create test TruthBox projects
-  await truthBoxMinter.create(minter.address, "00_tokenURI", "00_infoURI", testData.bytes_mint, 1000);
-  await truthBoxMinter.create(minter.address, "01_tokenURI", "01_infoURI", testData.bytes_mint, 1000);
-  await truthBoxMinter.create(minter.address, "02_tokenURI", "02_infoURI", testData.bytes_mint, 1000);
-  await truthBoxMinter.create(minter.address, "03_tokenURI", "03_infoURI", testData.bytes_mint, 1000);
-  await truthBoxMinter.create(minter.address, "04_tokenURI", "04_infoURI", testData.bytes_mint, 1000);
-  await truthBoxMinter.createAndPublish(minter.address, "05_tokenURI——public", "05_infoURI——public");
+  await truthBoxMinter.create( "00_tokenURI", "00_infoURI", testData.bytes_mint, 1000);
+  await truthBoxMinter.create("01_tokenURI", "01_infoURI", testData.bytes_mint, 1000);
+  await truthBoxMinter.create("02_tokenURI", "02_infoURI", testData.bytes_mint, 1000);
+  await truthBoxMinter.create( "03_tokenURI", "03_infoURI", testData.bytes_mint, 1000);
+  await truthBoxMinter.create("04_tokenURI", "04_infoURI", testData.bytes_mint, 1000);
+  await truthBoxMinter.createAndPublish("05_tokenURI——public", "05_infoURI——public");
 }
 
 module.exports = {

@@ -2,20 +2,20 @@
 const { expect } = require("chai");
 const { network, ethers } = require("hardhat");
 
-// Directly define Status enum, consistent with Solidity contract
+// Directly define Status enum, keep consistent with Solidity contract
 const Status = {
     Storing: 0,
     Selling: 1,
     Auctioning: 2,
     Paid: 3,
     Refunding: 4,
-    InSecrecy: 5,
+    Delaying: 5,
     Published: 6,
     Blacklisted: 7
 };
 
 const TimeHelpers = {
-    // Verify if time difference is within expected range
+    // Verify time difference is within expected range
     verifyTimeDifference(actualDiff, expectedDiff, allowedDelta = 10, message = "") {
         expect(actualDiff).to.be.closeTo(
             expectedDiff,
@@ -24,7 +24,7 @@ const TimeHelpers = {
         );
     },
 
-    // Verify deadline
+    // Verify deadline is within expected range
     verifyDeadline(deadline, baseTime, expectedDiff, allowedDelta = 10) {
         const actualDiff = Number(deadline) - Number(baseTime);
         this.verifyTimeDifference(
@@ -50,7 +50,7 @@ const TimeHelpers = {
     //     }
     // },
 
-    // // Quickly advance common time periods
+    // // Advance common time periods
     // async advanceDays(days) {
     //     await this.advanceTime(days * 24 * 60 * 60);
     // },
@@ -58,7 +58,7 @@ const TimeHelpers = {
 
 };
 
-// 2. Status handling helper functions
+// 2. Status processing helper functions
 // const StatusHelpers = {
 //     // Verify token status
 //     async verifyTokenStatus(truthBox, tokenId, expectedStatus) {

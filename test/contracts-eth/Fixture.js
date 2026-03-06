@@ -5,27 +5,26 @@ const {
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 
-// Import modularized configurations
 const { deployContracts } = require("./fixtures/contracts");
 const { createConnectors } = require("./fixtures/connectors");
 const { configureTokens } = require("./fixtures/tokenConfig");
 const { initializeContracts } = require("./fixtures/initialization");
 
 /**
- * Main test pre-deployment function
- * Integrates all modularized configurations
+ * Main test fixture function
+ * Integrates all modular configurations
  */
 async function deployTruthBoxFixture() {
   // 1. Deploy all contracts
   const { signers, contracts } = await deployContracts();
   
-  // 2. Create contract connectors
+  // 2. Create connectors
   const connectors = await createConnectors(signers, contracts);
   
   // 3. Configure tokens (minting, authorization, liquidity)
   await configureTokens(signers, contracts, connectors);
   
-  // 4. Initialize contract parameters and create test data
+  // 4. Initialize contracts and create test data
   const testData = await initializeContracts(contracts, connectors, signers);
   
   // 5. Define time constants
@@ -33,16 +32,16 @@ async function deployTruthBoxFixture() {
   const MONTH = 30 * 24 * 60 * 60;
   const YEAR = 365 * 24 * 60 * 60;
 
-  // 6. Return all data and connectors needed for testing
+  // 6. Return all test data and connectors
   return {
     // Signers
     ...signers,
     DAY, MONTH, YEAR,
     
-    // Contract instances
+    // Contracts
     ...contracts,
     
-    // Connectors (maintain backward compatible naming)
+    // Connectors
     truthBox_minter: connectors.truthBoxConnectors.minter,
     truthBox_other: connectors.truthBoxConnectors.other,
     truthBox_DAO: connectors.truthBoxConnectors.dao,
@@ -56,11 +55,6 @@ async function deployTruthBoxFixture() {
     exchange_other: connectors.exchangeConnectors.other,
     exchange_completer: connectors.exchangeConnectors.completer,
     
-    nft_minter: connectors.truthNFTConnectors.minter,
-    nft_other: connectors.truthNFTConnectors.other,
-    nft_buyer: connectors.truthNFTConnectors.buyer,
-    nft_DAO: connectors.truthNFTConnectors.dao,
-    
     fundManager_dao_fund_manager: connectors.fundManagerConnectors.dao_fund_manager,
     fundManager_completer: connectors.fundManagerConnectors.completer,
     fundManager_minter: connectors.fundManagerConnectors.minter,
@@ -72,9 +66,9 @@ async function deployTruthBoxFixture() {
     swapContract_buyer: connectors.swapContractConnectors.buyer,
     swapContract_other: connectors.swapContractConnectors.other,
     
-    userId_buyer: connectors.userIdConnectors.buyer,
-    userId_minter: connectors.userIdConnectors.minter,
-    userId_DAO: connectors.userIdConnectors.dao,
+    userManager_buyer: connectors.userManagerConnectors.buyer,
+    userManager_minter: connectors.userManagerConnectors.minter,
+    userManager_DAO: connectors.userManagerConnectors.dao,
     
     // Test data
     ...testData
