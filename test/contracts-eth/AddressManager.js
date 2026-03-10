@@ -7,8 +7,8 @@ const { expect } = require("chai");
 const { deployTruthBoxFixture} = require("./Fixture.js");
 const {timestampToDate} = require('../utils/timeToDate.js');
 
-describe("AddressManager- related tests", function () {
-  it("set address list", async function () {
+describe("AddressManager- 相关测试", function () {
+  it("设置地址列表", async function () {
     const { 
       truthBox, exchange, userManager, addressManager,siweAuth, quoter, swapContract, fundManager, 
       buyer, minter, dao, wETH, wROSE, settlementToken, address_zero, wBTC,
@@ -19,9 +19,9 @@ describe("AddressManager- related tests", function () {
       truthBox.target, // dao
       exchange.target, // governance
       userManager.target, // daoFundManager
-      address_zero, // userManager original value
-      address_zero, // siweAuth original value
-      address_zero, // truthBox original value
+      address_zero, // userManager 原始值不变
+      address_zero, // siweAuth 原始值不变
+      address_zero, // truthBox 原始值不变
       wBTC.target, // exchange
       wETH.target, // fundManager
     ]

@@ -1,21 +1,21 @@
 /**
- * Contract Deployment Module
- * responsible for deploying all smart contracts
+ * 合约部署模块
+ * 负责部署所有智能合约
  */
 
 async function deployContracts() {
-  // get multiple signers, usually the first one is the account that deploys the contract
+  // 获取多个签名者，通常第一个是部署合约的账户
   const [
     admin, admin2, dao, governance, minter, 
     seller, buyer, buyer2, completer, other, 
-    other2, dao_fund_manager, siweAuth, quoter
+    other2, dao_fund_manager, siweAuth, quoter, forwarder
   ] = await ethers.getSigners();
 
-  // deploy core management contract
+  // 部署核心管理合约
   const AddressManager = await ethers.getContractFactory("AddressManager");
   const addressManager = await AddressManager.deploy();
 
-  // deploy token contract
+  // 部署代币合约
   const SettlementToken = await ethers.getContractFactory("MockERC20");
   const settlementToken = await SettlementToken.deploy("Truth Coin Test", "TCT");
   
@@ -27,7 +27,7 @@ async function deployContracts() {
   const TruthBox = await ethers.getContractFactory("TruthBox");
   const truthBox = await TruthBox.deploy(addressManager.target);
 
-  // deploy swap and fund management contract
+  // 部署交换和资金管理合约
   const SwapContract = await ethers.getContractFactory("SwapContract");
   const swapContract = await SwapContract.deploy();
 
@@ -44,9 +44,10 @@ async function deployContracts() {
     signers: {
       admin, admin2, dao, governance, minter, 
       seller, buyer, buyer2, completer, other, 
-      other2, dao_fund_manager, forwarder,
-      siweAuth, // NOTE: local test, use address to replace siweAuth token contract address.
-      quoter
+      other2, dao_fund_manager, 
+      siweAuth, // NOTE: 本地测试，使用地址来替代siweAuth令牌合约地址。
+      quoter, 
+      forwarder
     },
     contracts: {
       addressManager,

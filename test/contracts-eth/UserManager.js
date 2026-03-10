@@ -7,19 +7,21 @@ const { expect } = require("chai");
 const { deployTruthBoxFixture} = require("./Fixture.js");
 const {timestampToDate} = require('../utils/timeToDate.js');
 
-describe("UserManager test --- basic functions", function () {
-  it("get user id", async function () {
+describe("UserManager- 相关测试", function () {
+  it("获取用户ID", async function () {
     const { 
       truthBox, exchange, fundManager, userManager,
       buyer, minter, dao,
       userManager_buyer, userManager_minter, userManager_DAO
     } = await loadFixture(deployTruthBoxFixture);
 
-    // check the value returned by myUserId()
+    // 现在检查myUserId()返回的值
     const id_minter = await userManager_minter.myUserId();
 
+    // 验证ID不为0（表示已分配）
     expect(id_minter).to.equal(10000);
 
+    // 加入黑名单
     await userManager.addBlacklist(buyer.address);
     expect(await userManager.isBlacklisted(buyer.address)).to.equal(true);
 

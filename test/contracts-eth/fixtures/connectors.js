@@ -1,6 +1,6 @@
 /**
- * Contract Connectors Module
- * and create contract connectors for different users
+ * 合约连接器模块
+ * 负责为不同用户创建合约连接器实例
  */
 
 async function createConnectors(signers, contracts) {
@@ -9,7 +9,7 @@ async function createConnectors(signers, contracts) {
     admin, admin2, dao, governance, minter, 
     seller, buyer, buyer2, completer, other, 
     other2, dao_fund_manager, forwarder,
-    siweAuth, // replace SiweAuth contract, because eth version does not use SiweAuth
+    siweAuth, // 替代SiweAuth 合约，因为eth版本不使用SiweAuth
   } = signers;
 
   const {
@@ -25,15 +25,16 @@ async function createConnectors(signers, contracts) {
     userManager
   } = contracts;
 
-  // TruthBox Connectors
+  // TruthBox 连接器
   const truthBoxConnectors = {
     other: truthBox.connect(other),
     minter: truthBox.connect(minter),
     dao: truthBox.connect(dao),
-    buyer: truthBox.connect(buyer)
+    buyer: truthBox.connect(buyer),
+    buyer2: truthBox.connect(buyer2),
   };
 
-  // Exchange Connectors
+  // Exchange 连接器
   const exchangeConnectors = {
     minter: exchange.connect(minter),
     dao: exchange.connect(dao),
@@ -44,14 +45,18 @@ async function createConnectors(signers, contracts) {
     other: exchange.connect(other)
   };
 
-  // UserManager Connectors
+  // UserManager 连接器
   const userManagerConnectors = {
-    buyer: userManager.connect(buyer),
+    dao: userManager.connect(dao),
     minter: userManager.connect(minter),
-    dao: userManager.connect(dao)
+    buyer: userManager.connect(buyer),
+    buyer2: userManager.connect(buyer2),
+    seller: userManager.connect(seller),
+    completer: userManager.connect(completer),
+    other: userManager.connect(other),
   };
 
-  // FundManager Connectors
+  // FundManager 连接器
   const fundManagerConnectors = {
     minter: fundManager.connect(minter),
     buyer: fundManager.connect(buyer),
@@ -61,14 +66,16 @@ async function createConnectors(signers, contracts) {
     completer: fundManager.connect(completer)
   };
 
-  // Token Connectors
+  // 代币连接器
   const tokenConnectors = {
     settlementToken: {
       buyer: settlementToken.connect(buyer),
       buyer2: settlementToken.connect(buyer2),
       other: settlementToken.connect(other),
       other2: settlementToken.connect(other2),
-      minter: settlementToken.connect(minter)
+      minter: settlementToken.connect(minter),
+      seller:settlementToken.connect(seller),
+      completer:settlementToken.connect(completer),
     },
     wBTC: {
       minter: wBTC.connect(minter),
@@ -78,7 +85,7 @@ async function createConnectors(signers, contracts) {
     }
   };
 
-  // SwapContract Connectors
+  // SwapContract 连接器
   const swapContractConnectors = {
     minter: swapContract.connect(minter),
     buyer: swapContract.connect(buyer),

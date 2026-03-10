@@ -5,43 +5,40 @@ const {
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 
+// 导入模块化的配置
 const { deployContracts } = require("./fixtures/contracts");
 const { createConnectors } = require("./fixtures/connectors");
 const { configureTokens } = require("./fixtures/tokenConfig");
 const { initializeContracts } = require("./fixtures/initialization");
 
-/**
- * Main test fixture function
- * Integrates all modular configurations
- */
 async function deployTruthBoxFixture() {
-  // 1. Deploy all contracts
+  // 1. 部署所有合约
   const { signers, contracts } = await deployContracts();
   
-  // 2. Create connectors
+  // 2. 创建合约连接器
   const connectors = await createConnectors(signers, contracts);
   
-  // 3. Configure tokens (minting, authorization, liquidity)
+  // 3. 配置代币（铸造、授权、流动性）
   await configureTokens(signers, contracts, connectors);
   
-  // 4. Initialize contracts and create test data
+  // 4. 初始化合约参数和创建测试数据
   const testData = await initializeContracts(contracts, connectors, signers);
   
-  // 5. Define time constants
+  // 5. 定义时间常量
   const DAY = 24 * 60 * 60;
   const MONTH = 30 * 24 * 60 * 60;
   const YEAR = 365 * 24 * 60 * 60;
 
-  // 6. Return all test data and connectors
+  // 6. 返回所有测试需要的数据和连接器
   return {
-    // Signers
+    // 签名者
     ...signers,
     DAY, MONTH, YEAR,
     
-    // Contracts
+    // 合约实例
     ...contracts,
     
-    // Connectors
+    // 连接器（保持向后兼容的命名）
     truthBox_minter: connectors.truthBoxConnectors.minter,
     truthBox_other: connectors.truthBoxConnectors.other,
     truthBox_DAO: connectors.truthBoxConnectors.dao,
@@ -67,10 +64,14 @@ async function deployTruthBoxFixture() {
     swapContract_other: connectors.swapContractConnectors.other,
     
     userManager_buyer: connectors.userManagerConnectors.buyer,
+    userManager_buyer2: connectors.userManagerConnectors.buyer2,
     userManager_minter: connectors.userManagerConnectors.minter,
+    userManager_seller: connectors.userManagerConnectors.seller,
+    userManager_completer: connectors.userManagerConnectors.completer,
+    userManager_other: connectors.userManagerConnectors.other,
     userManager_DAO: connectors.userManagerConnectors.dao,
     
-    // Test data
+    // 测试数据
     ...testData
   };
 }
