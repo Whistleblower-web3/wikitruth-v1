@@ -1,6 +1,6 @@
 /**
- * Test fixture index file
- * export all test related modules
+ * 测试夹具模块索引文件
+ * 统一导出所有测试相关的模块
  */
 
 const { deployContracts } = require("./contracts");
@@ -18,16 +18,16 @@ const {
 } = require("./initialization");
 
 module.exports = {
-  // Contract Deployment
+  // 合约部署
   deployContracts,
   
-  // Connector Creation
+  // 连接器创建
   createConnectors,
   
-  // Token Configuration
+  // 代币配置
   configureTokens,
   
-  // Initialization Configuration
+  // 初始化配置
   initializeContracts,
   generateTestData,
   createTestTruthBoxes,
@@ -37,7 +37,7 @@ module.exports = {
   otherRewardRate,
   slippageProtection,
   
-  // Utils
+  // 工具函数
   utils: {
     generateTestData,
     createTestTruthBoxes

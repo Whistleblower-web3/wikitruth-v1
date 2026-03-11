@@ -2,7 +2,7 @@
 const { expect } = require("chai");
 const { network, ethers } = require("hardhat");
 
-// Directly define Status enum, keep consistent with Solidity contract
+// 直接定义Status枚举，与Solidity合约中保持一致
 const Status = {
     Storing: 0,
     Selling: 1,
@@ -15,7 +15,7 @@ const Status = {
 };
 
 const TimeHelpers = {
-    // Verify time difference is within expected range
+    // 验证时间差是否在预期范围内
     verifyTimeDifference(actualDiff, expectedDiff, allowedDelta = 10, message = "") {
         expect(actualDiff).to.be.closeTo(
             expectedDiff,
@@ -24,7 +24,7 @@ const TimeHelpers = {
         );
     },
 
-    // Verify deadline is within expected range
+    // 验证截止时间
     verifyDeadline(deadline, baseTime, expectedDiff, allowedDelta = 10) {
         const actualDiff = Number(deadline) - Number(baseTime);
         this.verifyTimeDifference(
@@ -35,13 +35,13 @@ const TimeHelpers = {
         );
     },
 
-    // Advance blockchain time
+    // 推进区块链时间
     // async advanceTime(seconds) {
     //     await network.provider.send("evm_increaseTime", [seconds]);
     //     await network.provider.send("evm_mine");
     // },
 
-    // // Advance to specific deadline
+    // // 推进到特定截止日期
     // async advanceToDeadline(deadline) {
     //     const now = (await ethers.provider.getBlock("latest")).timestamp;
     //     const timeToAdvance = Number(deadline) - now;
@@ -50,7 +50,7 @@ const TimeHelpers = {
     //     }
     // },
 
-    // // Advance common time periods
+    // // 快速推进常用时间周期
     // async advanceDays(days) {
     //     await this.advanceTime(days * 24 * 60 * 60);
     // },
@@ -58,15 +58,15 @@ const TimeHelpers = {
 
 };
 
-// 2. Status processing helper functions
+// 2. 状态处理辅助函数
 // const StatusHelpers = {
-//     // Verify token status
+//     // 验证代币状态
 //     async verifyTokenStatus(truthBox, tokenId, expectedStatus) {
 //         const status = await truthBox.getStatus(tokenId);
 //         expect(status).to.equal(expectedStatus);
 //     },
 
-//     // Verify timestamp exists
+//     // 验证时间戳存在
 //     async verifyTimestampExists(exchange, tokenId, timestampGetter) {
 //         const timestamp = await timestampGetter(tokenId);
 //         expect(timestamp).to.not.equal(0);
