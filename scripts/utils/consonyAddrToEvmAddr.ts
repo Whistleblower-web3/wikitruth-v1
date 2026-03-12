@@ -3,63 +3,63 @@ import { ethers } from "ethers";
 import * as crypto from "crypto";
 import * as dotenv from "dotenv";
 
-// Load environment variables
+// 加载环境变量
 dotenv.config();
 
-// Run: npx hardhat run scripts/utils/convertOasisToEvmPrivateKey.ts
+// 运行：npx hardhat run scripts/utils/convertOasisToEvmPrivateKey.ts
 
 /**
- * Convert Oasis private key to EVM private key
- * Oasis uses Ed25519 signature algorithm, EVM uses secp256k1 signature algorithm
- * Here we generate EVM-compatible private key through hash conversion
+ * 将Oasis私钥转换为EVM私钥
+ * Oasis使用Ed25519签名算法，EVM使用secp256k1签名算法
+ * 这里通过哈希转换的方式生成EVM兼容的私钥
  */
 function convertOasisToEvmPrivateKey(oasisPrivateKey: string): string {
     try {
-        // Oasis private key is Base64 encoded, decode first
+        // Oasis私钥是Base64编码的，先解码
         const decodedKey = Buffer.from(oasisPrivateKey, 'base64');
         
-        // Use SHA256 hash of decoded private key to generate 32-byte EVM private key
+        // 使用SHA256哈希解码后的私钥，生成32字节的EVM私钥
         const hash = crypto.createHash('sha256').update(decodedKey).digest();
         
-        // Convert to hexadecimal string and add 0x prefix
+        // 转换为十六进制字符串并添加0x前缀
         return '0x' + hash.toString('hex');
     } catch (error) {
-        throw new Error(`Private key conversion failed: ${error}`);
+        throw new Error(`私钥转换失败: ${error}`);
     }
 }
 
 /**
- * Verify EVM private key and get address
+ * 验证EVM私钥并获取地址
  */
 function getEvmAddressFromPrivateKey(privateKey: string): string {
     try {
         const wallet = new ethers.Wallet(privateKey);
         return wallet.address;
     } catch (error) {
-        throw new Error(`Invalid private key: ${error}`);
+        throw new Error(`无效的私钥: ${error}`);
     }
 }
 
 /**
- * Main function: convert and display results
+ * 主函数：转换并显示结果
  */
 async function main() {
-    console.log("=== Oasis Private Key to EVM Private Key Conversion Tool ===\n");
+    console.log("=== Oasis私钥转EVM私钥转换工具 ===\n");
     
-    // Get all Oasis accounts
+    // 获取所有Oasis账户
     const oasisAccounts = user_oasis_WikiTruth;
     
-    console.log("Conversion results:\n");
-    console.log("Account Type".padEnd(12) + "Oasis Address".padEnd(50) + "EVM Address".padEnd(45) + "EVM Private Key");
+    console.log("转换结果：\n");
+    console.log("账户类型".padEnd(12) + "Oasis地址".padEnd(50) + "EVM地址".padEnd(45) + "EVM私钥");
     console.log("-".repeat(120));
     
     for (const [accountType, account] of Object.entries(oasisAccounts)) {
         if (account.privateKey && account.address) {
             try {
-                // Convert private key
+                // 转换私钥
                 const evmPrivateKey = convertOasisToEvmPrivateKey(account.privateKey);
                 
-                // Get EVM address
+                // 获取EVM地址
                 const evmAddress = getEvmAddressFromPrivateKey(evmPrivateKey);
                 
                 console.log(
@@ -72,31 +72,31 @@ async function main() {
                 console.log(
                     accountType.padEnd(12) + 
                     account.address.padEnd(50) + 
-                    "Conversion failed".padEnd(45) + 
+                    "转换失败".padEnd(45) + 
                     error
                 );
             }
         } else {
             console.log(
                 accountType.padEnd(12) + 
-                "Not configured".padEnd(50) + 
-                "Not configured".padEnd(45) + 
-                "Not configured"
+                "未配置".padEnd(50) + 
+                "未配置".padEnd(45) + 
+                "未配置"
             );
         }
     }
     
-    console.log("\n=== Conversion completed ===");
-    console.log("Note:");
-    console.log("1. This is an EVM private key generated through hash conversion, different from the original Oasis private key");
-    console.log("2. Please keep the generated EVM private key safe");
-    console.log("3. It is recommended to verify the conversion results on a test network first");
+    console.log("\n=== 转换完成 ===");
+    console.log("注意：");
+    console.log("1. 这是通过哈希转换生成的EVM私钥，与原Oasis私钥不同");
+    console.log("2. 请妥善保管生成的EVM私钥");
+    console.log("3. 建议在测试网络上先验证转换结果");
 }
 
-// Run script
+// 运行脚本
 if (require.main === module) {
     main().catch((error) => {
-        console.error("Script execution failed:", error);
+        console.error("脚本执行失败:", error);
         process.exit(1);
     });
 }

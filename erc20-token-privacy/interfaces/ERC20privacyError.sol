@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.24;
 
-interface PrivacyERC20Error {
+interface ERC20privacyError {
     /// Invalid permit label
     error InvalidPermitLabel();
     /// Invalid permit amount

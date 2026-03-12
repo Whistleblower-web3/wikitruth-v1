@@ -4,9 +4,9 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 /**
  * 
- * @returns Get Signer for sapphire-testnet testnet
+ * @returns 获取sapphire-testnet测试网的Signer
  * 
- * Run command: npx hardhat run scripts/utils/signers-sapphire-testnet.ts --network sapphire-testnet
+ * 运行命令：npx hardhat run scripts/utils/signers-sapphire-testnet.ts --network sapphire-testnet
  */
 
 interface Signers_SapphireTestnet {
@@ -23,7 +23,7 @@ export const getSigners_SapphireTestnet = async () : Promise<Signers_SapphireTes
 
     const network = await ethers.provider.getNetwork();
     if (Number(network.chainId) !== 23295) {
-        console.error("Current network ID is not 23295, please check network ID");
+        console.error("当前网络ID不是23295，请检查网络ID");
         return {
             adminSigner: null,
             minterSigner: null,
@@ -56,13 +56,13 @@ export const getSigners_SapphireTestnet = async () : Promise<Signers_SapphireTes
 }
 
 // async function main() {
-//     console.log("Starting to get Signer for sapphire-testnet testnet...");
+//     console.log("开始获取sapphire-testnet测试网的Signer...");
 
-//     // Check chainId 
+//     // 检查chainId 
 //     const network = await ethers.provider.getNetwork();
-//     console.log("🌐 Current network ID:", network.chainId);
+//     console.log("🌐 当前网络ID:", network.chainId);
 //     if (Number(network.chainId) !== 23295) {
-//         console.error("Current network ID is not 23295, please check network ID");
+//         console.error("当前网络ID不是23295，请检查网络ID");
 //         return;
 //     }
 
@@ -85,10 +85,10 @@ export const getSigners_SapphireTestnet = async () : Promise<Signers_SapphireTes
 
 // }
 
-// // Run deployment script
+// // 运行部署脚本
 // main()
 //     .then(() => process.exit(0))
 //     .catch((error) => {
-//         console.error("Failed:", error);
+//         console.error("失败:", error);
 //         process.exit(1);
 //     });

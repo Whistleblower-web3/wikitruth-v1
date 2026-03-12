@@ -9,20 +9,17 @@ import '@nomicfoundation/hardhat-chai-matchers';
 // import { HardhatRuntimeEnvironment } from "hardhat/types";
 // import { NETWORKS } from '@oasisprotocol/sapphire-paratime';
 
-// This function generates a SIWE message.
-// In the frontend, it's usually generated directly by the wallet and then sent to the contract.
-// Here it's manually generated only for testing purposes.
 export async function getSiweMsg(
     domain: string,
     signer: Signer,
     chainId: number,
-    expiration?: Date, // Expiration time
-    statement?: string, // Statement
-    resources?: string[], // Resources
+    expiration?: Date, // 过期时间
+    statement?: string, // 
+    resources?: string[], // 
 ): Promise<string> {
     return new SiweMessage({
         domain,
-        address: await signer.getAddress(), // Signer address, in the frontend usually the wallet address
+        address: await signer.getAddress(), // 签名者地址，在前端一般是钱包地址
         statement:
             statement ||
             `I accept the ExampleOrg Terms of Service: https://${domain}/tos`,

@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { Signer } from "ethers";
 
 /**
- * EIP712 permit type enumeration
+ * EIP712许可类型枚举
  */
 export enum PermitType {
     View = 0,
@@ -11,10 +11,10 @@ export enum PermitType {
 }
 
 /**
- * EIP712 signature result interface
+ * EIP712签名结果接口
  */
 export interface EIP712SignatureResult {
-    signature: string; // Complete signature string
+    signature: string; // 完整的签名字符串
     r: string;
     s: string;
     v: number;
@@ -34,17 +34,17 @@ export interface EIP712SignatureResult {
 }
 
 /**
- * Simple EIP712 signature function
+ * 简单的EIP712签名函数
  * 
- * @param signer Signer
- * @param spender Authorized recipient address
- * @param amount Authorization amount
- * @param permitType Permit type (0=View, 1=Transfer, 2=Approve)
- * @param contractAddress Contract address
- * @param domainName Domain name
- * @param domainVersion Domain version, default is "1"
- * @param deadline Deadline (Unix timestamp), default is 1 hour later
- * @returns EIP712 signature result
+ * @param signer 签名者
+ * @param spender 授权接收者地址
+ * @param amount 授权金额
+ * @param permitType 许可类型 (0=View, 1=Transfer, 2=Approve)
+ * @param contractAddress 合约地址
+ * @param domainName 域名
+ * @param domainVersion 域版本，默认为 "1"
+ * @param deadline 截止时间（Unix时间戳），默认1小时后
+ * @returns EIP712签名结果
  */
 export async function signEIP712(
     signer: Signer,
@@ -56,20 +56,20 @@ export async function signEIP712(
     domainVersion?: string,
     deadline?: number
 ): Promise<EIP712SignatureResult> {
-    // Get signer address
+    // 获取签名者地址
     const owner = await signer.getAddress();
     
-    // Get chain ID
+    // 获取链ID
     const network = await ethers.provider.getNetwork();
     const chainId = Number(network.chainId);
 
     const defaultDomainName = domainName || "Secret ERC20 Token";
     const defaultDomainVersion = domainVersion || "1";
     
-    // Set deadline (default 1 hour later)
+    // 设置截止时间（默认1小时后）
     const finalDeadline = deadline || Math.floor(Date.now() / 1000) + 3600;
     
-    // Create EIP712 domain
+    // 创建EIP712域
     const domain = {
         name: defaultDomainName,
         version: defaultDomainVersion,
@@ -77,7 +77,7 @@ export async function signEIP712(
         verifyingContract: contractAddress
     };
     
-    // EIP712 type definitions
+    // EIP712类型定义
     const types = {
         EIP712Permit: [
             { name: "label", type: "uint8" },
@@ -88,7 +88,7 @@ export async function signEIP712(
         ]
     };
     
-    // Signature value
+    // 签名值
     const value = {
         label: permitType,
         owner: owner,
@@ -97,7 +97,7 @@ export async function signEIP712(
         deadline: finalDeadline
     };
     
-    // Execute EIP712 signature
+    // 执行EIP712签名
     const signature = await signer.signTypedData(domain, types, value);
     const sig = ethers.Signature.from(signature);
     
@@ -112,7 +112,7 @@ export async function signEIP712(
 }
 
 /**
- * Build EIP712Permit
+ * 构建EIP712Permit
  */
 export async function buildEIP712Permit (
     signer: Signer,
@@ -128,7 +128,7 @@ export async function buildEIP712Permit (
     try {
     const eip712Result = await signEIP712(
         signer,
-        spender, // In transfer, spender is the recipient address
+        spender, // 在transfer中，spender就是接收者地址
         amount,
         permitType,
         contractAddress,
@@ -137,7 +137,7 @@ export async function buildEIP712Permit (
         deadline
     );
 
-    // Build EIP712Permit struct
+    // 构建EIP712Permit结构体
     const permit = {
         label: eip712Result.value.label, // PermitLabel.TRANSFER = 1
         owner: eip712Result.value.owner,
@@ -152,20 +152,20 @@ export async function buildEIP712Permit (
     };
     return permit;
     } catch (error) {
-        console.error("Failed to build EIP712Permit:", error);
+        console.error("构建EIP712Permit失败:", error);
         return null;
     }
 }
 
 /**
- * Verify EIP712 signature
+ * 验证EIP712签名
  * 
- * @param domain EIP712 domain configuration
- * @param types Type definitions
- * @param value Signature value
- * @param signature Signature string
- * @param expectedAddress Expected signer address
- * @returns Whether verification passed
+ * @param domain EIP712域配置
+ * @param types 类型定义
+ * @param value 签名值
+ * @param signature 签名字符串
+ * @param expectedAddress 期望的签名者地址
+ * @returns 验证是否通过
  */
 export async function verifyEIP712(
     domain: any,
@@ -178,7 +178,7 @@ export async function verifyEIP712(
         const recoveredAddress = ethers.verifyTypedData(domain, types, value, signature);
         return recoveredAddress.toLowerCase() === expectedAddress.toLowerCase();
     } catch (error) {
-        console.error("Signature verification failed:", error);
+        console.error("签名验证失败:", error);
         return false;
     }
 }

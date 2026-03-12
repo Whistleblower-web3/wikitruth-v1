@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {IWROSE} from "./interfaces/IWROSE.sol";
-import {PrivacyERC20Error} from "./interfaces/PrivacyERC20Error.sol";
+import {ERC20privacyError} from "./interfaces/ERC20privacyError.sol";
 
 import {
     IERC20Errors
@@ -19,11 +19,11 @@ import {
     Sapphire
 } from "@oasisprotocol/sapphire-contracts/contracts/Sapphire.sol";
 
-contract PrivacyWROSE is
+contract WROSEprivacy is
     Context,
     IWROSE,
     IERC20Errors,
-    PrivacyERC20Error,
+    ERC20privacyError,
     ReentrancyGuard
 {
     // encrypt related

@@ -20,13 +20,13 @@ import {
     Sapphire
 } from "@oasisprotocol/sapphire-contracts/contracts/Sapphire.sol";
 
-import {PrivacyERC20Error} from "./interfaces/PrivacyERC20Error.sol";
+import {ERC20privacyError} from "./interfaces/ERC20privacyError.sol";
 
-contract PrivacyERC20 is
+contract ERC20privacy is
     Context,
     IERC20Metadata,
     IERC20Errors,
-    PrivacyERC20Error,
+    ERC20privacyError,
     ReentrancyGuard
 {
     // encrypt related
