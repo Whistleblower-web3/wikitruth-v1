@@ -6,7 +6,9 @@ import { Signer, Signature } from 'ethers';
 import { SiweMessage } from 'siwe';
 import '@nomicfoundation/hardhat-chai-matchers';
 
-
+/**
+ * SIWE配置接口
+ */
 interface SiweConfig {
     chainId: number;
     version: string;
@@ -14,7 +16,9 @@ interface SiweConfig {
     defaultExpirationHours: number;
 }
 
-
+/**
+ * SIWE消息参数接口
+ */
 export interface SiweMessageParams {
     domain: string;
     signer: Signer;
@@ -28,13 +32,13 @@ export interface SiweMessageParams {
     notBefore?: Date;
 }
 
-// TODO: Add: multiple domain configurations
+// TODO 新增：多个域名配置
 const primaryDomain: string = "primary.example.com";
 const domain1: string = "app.example.com";
 const domain2: string = "api.example.com";
 const domain3: string = "test.example.com";
 const domain4: string = "dev.example.com";
-// Invalid domain, for testing invalid domain login
+// 无效的域名，用于测试无效域名登录
 const invalidDomain: string = "invalid.notallowed.com";
 
 const domainTest: string = "domainsfs.example.com";
@@ -43,7 +47,7 @@ const domainTest2: string = "newOther.example.com";
 export const domainList: string[] = [primaryDomain, domain1, domain2, domain3, domain4, invalidDomain, domainTest, domainTest2];
 
 /**
- * Supported test network configurations
+ * 支持的测试网络配置
  */
 const SUPPORTED_NETWORKS: Record<number, SiweConfig> = {
     23293: { // sapphire_localnet
@@ -53,13 +57,13 @@ const SUPPORTED_NETWORKS: Record<number, SiweConfig> = {
         defaultExpirationHours: 24
     },
     23294: { // sapphire_testnet
-        chainId: 23295,
+        chainId: 23294,
         version: '1',
         defaultStatement: 'I accept the WikiTruth Terms of Service',
         defaultExpirationHours: 24
     },
     23295: { // sapphire_mainnet
-        chainId: 23294,
+        chainId: 23295,
         version: '1',
         defaultStatement: 'I accept the WikiTruth Terms of Service',
         defaultExpirationHours: 24
@@ -73,52 +77,52 @@ const SUPPORTED_NETWORKS: Record<number, SiweConfig> = {
 };
 
 /**
- * Get network configuration
+ * 获取网络配置
  */
 const getNetworkConfig = (chainId: number): SiweConfig => {
     const config = SUPPORTED_NETWORKS[chainId];
     if (!config) {
-        throw new Error(`Unsupported chain ID: ${chainId}. Supported chain IDs: ${Object.keys(SUPPORTED_NETWORKS).join(', ')}`);
+        throw new Error(`不支持的链ID: ${chainId}。支持的链ID: ${Object.keys(SUPPORTED_NETWORKS).join(', ')}`);
     }
     return config;
 };
 
 /**
- * Validate domain format
+ * 验证域名格式
  */
 const validateDomain = (domain: string): void => {
     if (!domain || typeof domain !== 'string') {
-        throw new Error('Domain cannot be empty and must be a string');
+        throw new Error('域名不能为空且必须是字符串');
     }
     
-    // Simple domain format validation
+    // 简单的域名格式验证
     const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
     if (!domainRegex.test(domain)) {
-        throw new Error('Domain format is invalid');
+        throw new Error('域名格式无效');
     }
 };
 
 /**
- * Validate signer
+ * 验证签名者
  */
 const validateSigner = async (signer: Signer): Promise<string> => {
     if (!signer || typeof signer.getAddress !== 'function') {
-        throw new Error('Signer is invalid');
+        throw new Error('签名者无效');
     }
     
     try {
         return await signer.getAddress();
     } catch (error) {
-        throw new Error(`Failed to get signer address: ${error}`);
+        throw new Error(`获取签名者地址失败: ${error}`);
     }
 };
 
 /**
- * Generate SIWE message
- * Simulate generating a SIWE (Sign-In with Ethereum) message
+ * 生成SIWE消息
+ * 模拟生成一个SIWE (Sign-In with Ethereum) 消息
  * 
- * @param params SIWE message parameters
- * @returns SIWE message string
+ * @param params SIWE消息参数
+ * @returns SIWE消息字符串
  */
 export const siweMsg = async function (params: SiweMessageParams): Promise<string> {
     const {
@@ -134,21 +138,21 @@ export const siweMsg = async function (params: SiweMessageParams): Promise<strin
         notBefore
     } = params;
 
-    console.log("🔐 Generating SIWE message...");
+    console.log("🔐 生成SIWE消息...");
 
     try {
-        // Parameter validation
+        // 参数验证
         validateDomain(domain);
         const signerAddress = await validateSigner(signer);
         
-        // Get network configuration
+        // 获取网络配置
         const networkConfig = getNetworkConfig(chainId || 23293);
         
-        // Set default expiration time
+        // 设置默认过期时间
         const defaultExpiration = new Date();
         defaultExpiration.setHours(defaultExpiration.getHours() + networkConfig.defaultExpirationHours);
         
-        // Build SIWE message
+        // 构建SIWE消息
         const siweMessage = new SiweMessage({
             domain,
             address: signerAddress,
@@ -164,17 +168,17 @@ export const siweMsg = async function (params: SiweMessageParams): Promise<strin
         });
 
         const message = siweMessage.toMessage();
-        console.log(`✅ SIWE message generated successfully, signer: ${signerAddress}`);
+        console.log(`✅ SIWE消息生成成功，签名者: ${signerAddress}`);
         return message;
 
     } catch (error) {
-        console.error("❌ Failed to generate SIWE message:", error);
+        console.error("❌ 生成SIWE消息失败:", error);
         throw error;
     }
 };
 
 /**
- * Generate SIWE message (simplified version, for backward compatibility)
+ * 生成SIWE消息（简化版本，保持向后兼容）
  */
 export const siweMsgSimple = async function (
     domain: string,
@@ -195,43 +199,44 @@ export const siweMsgSimple = async function (
 };
 
 /**
- * Sign the message with ERC-191 "personal_sign"
+ * 对消息进行ERC-191 "personal_sign"签名
+ * 将给定的消息作为ERC-191 "personal_sign"消息进行签名
  * 
- * @param msg Message to sign
- * @param account Signer account
- * @returns Signature object
+ * @param msg 要签名的消息
+ * @param account 签名账户
+ * @returns 签名对象
  */
 export const erc191sign = async function (msg: string, account: Signer): Promise<Signature> {
-    console.log("✍️ Signing with ERC-191...");
+    console.log("✍️ 进行ERC-191签名...");
 
     try {
-        // Parameter validation
+        // 参数验证
         if (!msg || typeof msg !== 'string') {
-            throw new Error('Message cannot be empty and must be a string');
+            throw new Error('消息不能为空且必须是字符串');
         }
         
         await validateSigner(account);
         
-        // Execute signature
+        // 执行签名
         const signature = await account.signMessage(msg);
         const sig = ethers.Signature.from(signature);
         
-        console.log(`✅ ERC-191 signature successful, signer: ${await account.getAddress()}`);
+        console.log(`✅ ERC-191签名成功，签名者: ${await account.getAddress()}`);
         return sig;
 
     } catch (error) {
-        console.error("❌ Failed to sign with ERC-191:", error);
+        console.error("❌ ERC-191签名失败:", error);
         throw error;
     }
 };
 
 /**
- * Verify SIWE message signature
+ * 验证SIWE消息签名
  * 
- * @param message SIWE message
- * @param signature Signature
- * @param expectedAddress Expected signer address
- * @returns Verification result
+ * @param message SIWE消息
+ * @param signature 签名
+ * @param expectedAddress 期望的签名者地址
+ * @returns 验证结果
  */
 export const verifySiweSignature = async function (
     message: string,
@@ -242,27 +247,27 @@ export const verifySiweSignature = async function (
         const recoveredAddress = ethers.verifyMessage(message, signature);
         return recoveredAddress.toLowerCase() === expectedAddress.toLowerCase();
     } catch (error) {
-        console.error("❌ Failed to verify SIWE signature:", error);
+        console.error("❌ SIWE签名验证失败:", error);
         return false;
     }
 };
 
 /**
-    * Generate random nonce
+ * 生成随机nonce
  */
 export const generateNonce = (): string => {
     return ethers.hexlify(ethers.randomBytes(16));
 };
 
 /**
- * Get supported chain ID list
+ * 获取支持的链ID列表
  */
 export const getSupportedChainIds = (): number[] => {
     return Object.keys(SUPPORTED_NETWORKS).map(id => parseInt(id));
 };
 
 /**
- * Check if chain ID is supported
+ * 检查链ID是否支持
  */
 export const isChainIdSupported = (chainId: number): boolean => {
     return chainId in SUPPORTED_NETWORKS;

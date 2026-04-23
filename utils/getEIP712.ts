@@ -4,7 +4,7 @@ import { Signer, Signature } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 /**
- * EIP712 permit type enumeration
+ * EIP712许可类型枚举
  */
 export enum PermitType {
     View = 0,
@@ -13,7 +13,7 @@ export enum PermitType {
 }
 
 /**
- * EIP712 domain configuration interface
+ * EIP712域配置接口
  */
 export interface EIP712Domain {
     name: string;
@@ -23,7 +23,7 @@ export interface EIP712Domain {
 }
 
 /**
- * EIP712 permit parameters interface
+ * EIP712许可参数接口
  */
 export interface EIP712PermitParams {
     signer: Signer;
@@ -38,7 +38,7 @@ export interface EIP712PermitParams {
 }
 
 /**
- * EIP712 permit result interface
+ * EIP712许可结果接口
  */
 export interface EIP712PermitResult {
     label: PermitType;
@@ -55,7 +55,7 @@ export interface EIP712PermitResult {
 }
 
 /**
- * Network configuration interface
+ * 网络配置接口
  */
 interface NetworkConfig {
     chainId: number;
@@ -65,7 +65,7 @@ interface NetworkConfig {
 }
 
 /**
- * Supported test network configurations
+ * 支持的测试网络配置
  */
 const SUPPORTED_NETWORKS: Record<number, NetworkConfig> = {
     23293: { // sapphire_localnet
@@ -75,13 +75,13 @@ const SUPPORTED_NETWORKS: Record<number, NetworkConfig> = {
         defaultDomainVersion: "1"
     },
     23294: { // sapphire_testnet
-        chainId: 23295,
+        chainId: 23294,
         name: "sapphire_testnet",
         defaultDomainName: "Private Token",
         defaultDomainVersion: "1"
     },
     23295: { // sapphire_mainnet
-        chainId: 23294,
+        chainId: 23295,
         name: "sapphire_mainnet",
         defaultDomainName: "Private Token",
         defaultDomainVersion: "1"
@@ -95,50 +95,50 @@ const SUPPORTED_NETWORKS: Record<number, NetworkConfig> = {
 };
 
 /**
- * Get network configuration
+ * 获取网络配置
  */
 const getNetworkConfig = (chainId: number): NetworkConfig => {
     const config = SUPPORTED_NETWORKS[chainId];
     if (!config) {
-        throw new Error(`Unsupported chain ID: ${chainId}. Supported chain IDs: ${Object.keys(SUPPORTED_NETWORKS).join(', ')}`);
+        throw new Error(`不支持的链ID: ${chainId}。支持的链ID: ${Object.keys(SUPPORTED_NETWORKS).join(', ')}`);
     }
     return config;
 };
 
 /**
- * Validate address format
+ * 验证地址格式
  */
 const validateAddress = (address: string, name: string): void => {
     if (!address || typeof address !== 'string') {
-        throw new Error(`${name} address cannot be empty and must be a string`);
+        throw new Error(`${name} 地址不能为空且必须是字符串`);
     }
-    
+
     if (!ethers.isAddress(address)) {
-        throw new Error(`${name} address format is invalid: ${address}`);
+        throw new Error(`${name} 地址格式无效: ${address}`);
     }
 };
 
 /**
- * Validate signer
+ * 验证签名者
  */
 const validateSigner = async (signer: Signer): Promise<string> => {
     if (!signer || typeof signer.getAddress !== 'function') {
-        throw new Error('Signer is invalid');
+        throw new Error('签名者无效');
     }
-    
+
     try {
         return await signer.getAddress();
     } catch (error) {
-        throw new Error(`Failed to get signer address: ${error}`);
+        throw new Error(`获取签名者地址失败: ${error}`);
     }
 };
 
 /**
- * Get address string
+ * 获取地址字符串
  */
 const getAddressString = async (addressOrSigner: Signer | string): Promise<string> => {
     if (typeof addressOrSigner === 'string') {
-        validateAddress(addressOrSigner, 'Address');
+        validateAddress(addressOrSigner, '地址');
         return addressOrSigner;
     } else {
         return await validateSigner(addressOrSigner);
@@ -146,7 +146,7 @@ const getAddressString = async (addressOrSigner: Signer | string): Promise<strin
 };
 
 /**
- * Create EIP712 domain configuration
+ * 创建EIP712域配置
  */
 const createEIP712Domain = (
     contractAddress: string,
@@ -155,7 +155,7 @@ const createEIP712Domain = (
     domainVersion?: string
 ): EIP712Domain => {
     const networkConfig = getNetworkConfig(chainId);
-    
+
     return {
         name: domainName || networkConfig.defaultDomainName,
         version: domainVersion || networkConfig.defaultDomainVersion,
@@ -165,11 +165,11 @@ const createEIP712Domain = (
 };
 
 /**
- * Generate EIP712 permit signature
- * Create EIP712 permit signature for private token
+ * 生成EIP712许可签名
+ * 为私有代币创建EIP712许可签名
  * 
- * @param params EIP712 permit parameters
- * @returns EIP712 permit result
+ * @param params EIP712许可参数
+ * @returns EIP712许可结果
  */
 export const createEIP712Permit_PrivateToken = async function (
     params: EIP712PermitParams
@@ -186,46 +186,46 @@ export const createEIP712Permit_PrivateToken = async function (
         domainVersion
     } = params;
 
-    console.log("🔐 Generating EIP712 permit signature...");
+    console.log("🔐 生成EIP712许可签名...");
 
     try {
-        // Parameter validation
+        // 参数验证
         const signerAddress = await validateSigner(signer);
         const spenderAddress = await getAddressString(spender);
-        
-        validateAddress(contractAddress, 'Contract');
-        
-        // Validate amount
+
+        validateAddress(contractAddress, '合约');
+
+        // 验证金额
         if (amount < 0) {
-            throw new Error('Amount cannot be negative');
-        }
-        
-        // Validate permit type
-        if (!Object.values(PermitType).includes(mode)) {
-            throw new Error(`Invalid permit type: ${mode}`);
+            throw new Error('金额不能为负数');
         }
 
-        // Get chain ID
+        // 验证许可类型
+        if (!Object.values(PermitType).includes(mode)) {
+            throw new Error(`无效的许可类型: ${mode}`);
+        }
+
+        // 获取链ID
         const chainId = networkParam?.chainId || (await ethers.provider.getNetwork()).chainId;
-        
-        // Create domain configuration
+
+        // 创建域配置
         const domain = createEIP712Domain(contractAddress, Number(chainId), domainName, domainVersion);
-        
-        // Set deadline
-        const deadline = customDeadline || Math.floor(Date.now() / 1000) + 3600; // Default 1 hour later
-        
-        // EIP712 type definition
+
+        // 设置截止时间
+        const deadline = customDeadline || Math.floor(Date.now() / 1000) + 3600; // 默认1小时后过期
+
+        // EIP712类型定义
         const types = {
             EIP712Permit: [
-                { name: "label", type: "uint8" }, // PermitType enumeration corresponds to uint8
+                { name: "label", type: "uint8" }, // PermitType枚举对应uint8
                 { name: "owner", type: "address" },
                 { name: "spender", type: "address" },
                 { name: "amount", type: "uint256" },
                 { name: "deadline", type: "uint256" }
             ]
         };
-        
-        // Signature value
+
+        // 签名值
         const value = {
             label: mode,
             owner: signerAddress,
@@ -233,19 +233,19 @@ export const createEIP712Permit_PrivateToken = async function (
             amount: BigInt(amount),
             deadline: deadline
         };
-        
-        console.log(`📝 Signature parameters:`, {
+
+        console.log(`📝 签名参数:`, {
             owner: signerAddress,
             spender: spenderAddress,
             amount: amount.toString(),
             mode: PermitType[mode],
             deadline: new Date(deadline * 1000).toISOString()
         });
-        
-        // Execute EIP712 signature
+
+        // 执行EIP712签名
         const signature = await signer.signTypedData(domain, types, value);
         const sig = ethers.Signature.from(signature);
-        
+
         const result: EIP712PermitResult = {
             label: mode,
             owner: signerAddress,
@@ -259,50 +259,26 @@ export const createEIP712Permit_PrivateToken = async function (
             },
             domain: domain
         };
-        
-        console.log(`✅ EIP712 permit signature generated successfully`);
+
+        console.log(`✅ EIP712许可签名生成成功`);
         return result;
 
     } catch (error) {
-        console.error("❌ Failed to generate EIP712 permit signature:", error);
+        console.error("❌ EIP712许可签名生成失败:", error);
         throw error;
     }
 };
 
-/**
- * Generate EIP712 permit signature (simplified version, for backward compatibility)
- */
-export const createEIP712Permit_PrivateTokenSimple = async function (
-    signer: Signer,
-    spender: Signer | string,
-    amount: number,
-    mode: PermitType,
-    contractAddress: string,
-    domainName: string,
-    network?: any,
-    customDeadline?: number
-): Promise<EIP712PermitResult> {
-    return createEIP712Permit_PrivateToken({
-        signer,
-        spender,
-        amount,
-        mode,
-        contractAddress,
-        domainName,
-        network,
-        customDeadline
-    });
-};
 
 /**
- * Verify EIP712 signature
+ * 验证EIP712签名
  * 
- * @param domain EIP712 domain configuration
- * @param types Type definition
- * @param value Signature value
- * @param signature Signature
- * @param expectedAddress Expected signer address
- * @returns Verification result
+ * @param domain EIP712域配置
+ * @param types 类型定义
+ * @param value 签名值
+ * @param signature 签名
+ * @param expectedAddress 期望的签名者地址
+ * @returns 验证结果
  */
 export const verifyEIP712Signature = async function (
     domain: EIP712Domain,
@@ -315,42 +291,8 @@ export const verifyEIP712Signature = async function (
         const recoveredAddress = ethers.verifyTypedData(domain, types, value, signature);
         return recoveredAddress.toLowerCase() === expectedAddress.toLowerCase();
     } catch (error) {
-        console.error("❌ Failed to verify EIP712 signature:", error);
+        console.error("❌ EIP712签名验证失败:", error);
         return false;
     }
 };
-
-/**
- * Get supported chain ID list
- */
-export const getSupportedChainIds = (): number[] => {
-    return Object.keys(SUPPORTED_NETWORKS).map(id => parseInt(id));
-};
-
-/**
- * Check if chain ID is supported
- */
-export const isChainIdSupported = (chainId: number): boolean => {
-    return chainId in SUPPORTED_NETWORKS;
-};
-
-/**
- * Create custom EIP712 domain
- */
-export const createCustomEIP712Domain = (
-    name: string,
-    version: string,
-    chainId: number,
-    verifyingContract: string
-): EIP712Domain => {
-    validateAddress(verifyingContract, '合约');
-    
-    return {
-        name,
-        version,
-        chainId,
-        verifyingContract
-    };
-};
-
 

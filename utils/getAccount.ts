@@ -5,7 +5,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { user_evm_WikiTruth } from "../WikiTruth_account";
 
 /**
- * Network configuration interface
+ * 网络配置接口
  */
 interface NetworkConfig {
     chainId: number;
@@ -14,7 +14,7 @@ interface NetworkConfig {
 }
 
 /**
- * Test account interface
+ * 测试账户接口
  */
 export interface TestAccounts {
     admin: Wallet;
@@ -26,7 +26,7 @@ export interface TestAccounts {
 }
 
 /**
- * Supported test network configurations
+ * 支持的测试网络配置
  */
 const SUPPORTED_NETWORKS: NetworkConfig[] = [
     { chainId: 23293, name: "sapphire_localnet", isLocal: true },
@@ -37,31 +37,31 @@ const SUPPORTED_NETWORKS: NetworkConfig[] = [
 ];
 
 /**
- * Get network configuration
+ * 获取网络配置
  */
 const getNetworkConfig = (chainId: number): NetworkConfig => {
     const config = SUPPORTED_NETWORKS.find(net => net.chainId === chainId);
     if (!config) {
-        throw new Error(`Unsupported chain ID: ${chainId}. Supported chain IDs: ${SUPPORTED_NETWORKS.map(n => n.chainId).join(', ')}`);
+        throw new Error(`不支持的链ID: ${chainId}。支持的链ID: ${SUPPORTED_NETWORKS.map(n => n.chainId).join(', ')}`);
     }
     return config;
 };
 
 /**
- * Validate private key format
+ * 验证私钥格式
  */
 const validatePrivateKey = (privateKey: string, accountName: string): void => {
     if (!privateKey) {
-        throw new Error(`${accountName} private key is not configured`);
+        throw new Error(`${accountName} 的私钥未配置`);
     }
     
     if (!privateKey.startsWith('0x') || privateKey.length !== 66) {
-        throw new Error(`${accountName} private key format is invalid, should be 66-character hexadecimal string (including 0x prefix)`);
+        throw new Error(`${accountName} 的私钥格式无效，应为66位十六进制字符串（包含0x前缀）`);
     }
 };
 
 /**
- * Create wallet instance from configuration
+ * 从配置创建钱包实例
  */
 const createWalletFromConfig = (accountConfig: any, accountName: string): Wallet => {
     validatePrivateKey(accountConfig.privateKey, accountName);
@@ -69,19 +69,19 @@ const createWalletFromConfig = (accountConfig: any, accountName: string): Wallet
     try {
         return new ethers.Wallet(accountConfig.privateKey, ethers.provider);
     } catch (error) {
-        throw new Error(`Failed to create ${accountName} wallet: ${error}`);
+        throw new Error(`创建 ${accountName} 钱包失败: ${error}`);
     }
 };
 
 /**
- * Get test accounts
- * Based on the test network ID, get the corresponding test accounts
+ * 获取测试账户
+ * 根据测试网络ID，获取对应的测试账户
  * 
- * @param chainId Chain ID
- * @returns Test accounts object
+ * @param chainId 链ID
+ * @returns 测试账户对象
  */
 export const getAccount = async function (chainId: number| bigint): Promise<TestAccounts> {
-    console.log(`🔍 Getting test accounts for chain ID ${chainId}...`);
+    console.log(`🔍 获取链ID ${chainId} 的测试账户...`);
     
     if (typeof chainId === 'bigint') {
         chainId = Number(chainId);
@@ -89,17 +89,17 @@ export const getAccount = async function (chainId: number| bigint): Promise<Test
 
     try {
         const networkConfig = getNetworkConfig(chainId);
-        console.log(`📡 Network: ${networkConfig.name} (${networkConfig.isLocal ? 'Local' : 'Remote'})`);
+        console.log(`📡 网络: ${networkConfig.name} (${networkConfig.isLocal ? '本地' : '远程'})`);
 
         let accounts: TestAccounts;
 
         if (networkConfig.isLocal) {
-            // Local network: get accounts from hardhat
-            console.log("🏠 Using local network accounts...");
+            // 本地网络：从hardhat获取账户
+            console.log("🏠 使用本地网络账户...");
             const signers = await ethers.getSigners();
             
             if (signers.length < 6) {
-                throw new Error(`Local network accounts are insufficient, at least 6 accounts are required, actually only ${signers.length} accounts`);
+                throw new Error(`本地网络账户数量不足，需要至少6个账户，实际只有${signers.length}个`);
             }
 
             accounts = {
@@ -112,12 +112,12 @@ export const getAccount = async function (chainId: number| bigint): Promise<Test
             };
 
         } else {
-            // Remote network: get accounts from configuration file
-            console.log("🌐 Using remote network accounts...");
+            // 远程网络：从配置文件获取账户
+            console.log("🌐 使用远程网络账户...");
             
             // 验证配置文件
             if (!user_evm_WikiTruth) {
-                throw new Error("Remote network accounts configuration not found");
+                throw new Error("远程网络账户配置未找到");
             }
 
             accounts = {
@@ -130,28 +130,28 @@ export const getAccount = async function (chainId: number| bigint): Promise<Test
             };
         }
 
-        // Validate all account addresses
-        console.log("✅ Validating all account addresses...");
+        // 验证所有账户地址
+        console.log("✅ 账户地址验证:");
         for (const [role, wallet] of Object.entries(accounts)) {
             const address = await wallet.getAddress();
             console.log(`  ${role}: ${address}`);
         }
 
-        console.log("🎉 Successfully got all test accounts");
+        console.log("🎉 成功获取所有测试账户");
         return accounts;
 
     } catch (error) {
-        console.error("❌ Failed to get test accounts:", error);
+        console.error("❌ 获取测试账户失败:", error);
         throw error;
     }
 };
 
 /**
- * Get a single test account
+ * 获取单个测试账户
  * 
- * @param chainId Chain ID
- * @param role Account role
- * @returns Wallet instance of the specified role
+ * @param chainId 链ID
+ * @param role 账户角色
+ * @returns 指定角色的钱包实例
  */
 export const getAccountByRole = async function (
     chainId: number, 
@@ -162,14 +162,14 @@ export const getAccountByRole = async function (
 };
 
 /**
- * Get all supported chain IDs
+ * 获取所有支持的链ID
  */
 export const getSupportedChainIds = (): number[] => {
     return SUPPORTED_NETWORKS.map(net => net.chainId);
 };
 
 /**
- * Check if chain ID is supported
+ * 检查链ID是否支持
  */
 export const isChainIdSupported = (chainId: number): boolean => {
     return SUPPORTED_NETWORKS.some(net => net.chainId === chainId);

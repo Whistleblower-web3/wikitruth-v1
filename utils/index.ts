@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
-// Contract connection tool
+/**
+ * 测试工具函数统一导出
+ * 提供完整的智能合约测试工具集
+ */
+
+// 合约连接工具
 export {
     connectContracts,
     connectContract
 } from './connectContracts';
 
-// Account management tool
+// 账户管理工具
 export {
     getAccount,
     getAccountByRole,
@@ -15,7 +20,7 @@ export {
     type TestAccounts
 } from './getAccount';
 
-// SIWE authentication tool
+// SIWE认证工具
 export {
     siweMsg,
     siweMsgSimple,
@@ -28,7 +33,7 @@ export {
     type SiweMessageParams
 } from './getSiweAuth';
 
-// EIP712 signature tool
+// EIP712签名工具
 export {
     createEIP712Permit_PrivateToken,
     createEIP712Permit_PrivateTokenSimple,
@@ -42,7 +47,7 @@ export {
     type EIP712PermitResult
 } from './getEIP712';
 
-// General test tool
+// 通用测试工具
 export {
     sleep,
     waitForBlocks,
@@ -70,4 +75,52 @@ export {
     type TestResult
 } from './common';
 
-
+/**
+ * 工具函数使用示例
+ * 
+ * ```typescript
+ * import { 
+ *     getAccount, 
+ *     connectContracts, 
+ *     siweMsg, 
+ *     createEIP712Permit_PrivateToken,
+ *     deployContract,
+ *     waitForTransaction
+ * } from './utils';
+ * 
+ * // 获取测试账户
+ * const accounts = await getAccount(23293);
+ * 
+ * // 连接合约
+ * const connectedContracts = await connectContracts(
+ *     () => contractFactory.attach(contractAddress),
+ *     [accounts.admin, accounts.buyer]
+ * );
+ * 
+ * // 生成SIWE消息
+ * const message = await siweMsg({
+ *     domain: 'example.com',
+ *     signer: accounts.admin,
+ *     chainId: 23293
+ * });
+ * 
+ * // 创建EIP712许可
+ * const permit = await createEIP712Permit_PrivateToken({
+ *     signer: accounts.admin,
+ *     spender: accounts.buyer,
+ *     amount: 1000,
+ *     mode: PermitType.Transfer,
+ *     contractAddress: contractAddress
+ * });
+ * 
+ * // 部署合约
+ * const contract = await deployContract(
+ *     contractFactory,
+ *     accounts.admin,
+ *     [constructorArg1, constructorArg2]
+ * );
+ * 
+ * // 等待交易确认
+ * const receipt = await waitForTransaction(txHash);
+ * ```
+ */

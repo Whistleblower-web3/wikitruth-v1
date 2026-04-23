@@ -7,11 +7,9 @@ import "@oasisprotocol/sapphire-hardhat";
 import "dotenv/config"
 import "./tasks"
 import "@nomicfoundation/hardhat-foundry";
-
+import "hardhat-abi-exporter";
 import { hardhat_accounts } from "./test_account";
 
-
-// import { resolve } from "path";
 
 const sapphire_testnet_admin = process.env.ADMIN_PRIVATE_KEY_EVM ? process.env.ADMIN_PRIVATE_KEY_EVM : "";
 const sapphire_testnet_minter = process.env.MINTER_PRIVATE_KEY_EVM ? process.env.MINTER_PRIVATE_KEY_EVM : "";
@@ -26,6 +24,7 @@ const sapphire_mainnet_admin = process.env.ADMIN_PRIVATE_KEY_EVM ? process.env.A
 
 const config: HardhatUserConfig = {
   solidity: {
+
     compilers: [
       {
         version: "0.8.24",
@@ -94,9 +93,19 @@ const config: HardhatUserConfig = {
     //   ]
     // }
   },
-  // 
+  // 2. 添加 abiExporter 配置
+  abiExporter: {
+    path: './abi',        // 导出 ABI 的目标目录
+    runOnCompile: true,   // 开启编译时自动导出
+    clear: true,          // 每次导出前清空目录
+    flat: true,           // 是否合并所有合约到一个目录下（不按合约路径层级存放）
+    only: [':TruthBox$', ':Exchange$', ':FundManager$', ':UserManager$', ':AddressManager$', ':Forwarder$', 'SiweAuthWikiTruth'], // 可选：只导出匹配名称的合约（支持正则）
+    spacing: 2,           // JSON 缩进格数
+    format: "json",       // 导出格式，支持 "json" 或 "minimal" (极简模式)
+  },
   paths: {
-    sources: "./contracts",
+    sources: "./erc20-token-privacy", // need change the foundry.toml file
+    // sources: "./contracts", 
     tests: "./test",
     cache: "./cache",
     artifacts: "./artifacts"
@@ -162,7 +171,7 @@ const config: HardhatUserConfig = {
 		//  Enabled by default (not supported on Sapphire)
 		enabled: false,
 		apiKey: {
-			"sapphire-testnet": "test" // 
+			"sapphire-testnet": "test" // 占位符，Sapphire 不使用 Etherscan
 		}
 	},
 	// sourcify: {
