@@ -21,26 +21,26 @@ import {
 } from '../../utils';
 
 /**
- * Test SiweAuth contract
+ * 测试SiweAuth合约
  * 
- * Local testnet - Deploy new contract for testing
- * Start dockers: docker run --rm -it -p 8545:8545 ghcr.io/oasisprotocol/sapphire-localnet:latest
- * Run: npx hardhat test test/single/SiweAuth.ts (--network sapphire_localnet)
+ * 本地测试网 - 部署新合约进行测试
+ * 启动dockers： docker run --rm -it -p 8545:8545 ghcr.io/oasisprotocol/sapphire-localnet:latest
+ * 运行：npx hardhat test test/single/SiweAuth.ts （--network sapphire_localnet）
  * 
- * SIWE authentication flow implementation():
- * Part 1: Generate token
- *     1. Generate SIWE message required for login in frontend (script)
- *     2. User signs SIWE message with wallet and sends to contract
- *     3. Contract verifies SIWE message, --------------------Login function, and returns token
- * Part 2: Use authentication token to call contract authentication methods
- *     1. User uses authentication token to call contract authentication methods——————
- *     2. Contract verifies authentication token and returns authenticator address
- * Part 3: Revoke authentication token
- *     1. User uses authentication token to call contract authentication methods——————
- *     2. Contract verifies authentication token and returns authenticator address
- * Part 4: Use authenticator address to call contract authentication methods
- *     1. User uses authenticator address to call contract authentication methods——————
- *     2. Contract verifies authenticator address and returns authenticator address
+ * 实现SIWE认证的流程()：
+ * 第一部分：生成令牌token
+ *     1. 在前端（脚本）中，生成登录所需要的SIWE消息
+ *     2. 用户使用钱包签名SIWE消息，并发送给合约
+ *     3. 合约验证SIWE消息，--------------------Login函数，并返回token
+ * 第二部分：使用认证令牌调用合约的认证方法
+ *     1. 用户使用认证令牌调用合约的认证方法——————
+ *     2. 合约验证认证令牌，并返回认证者地址
+ * 第三部分：撤销认证令牌
+ *     1. 用户使用认证令牌调用合约的认证方法——————
+ *     2. 合约验证认证令牌，并返回认证者地址
+ * 第四部分：使用认证者地址调用合约的认证方法
+ *     1. 用户使用认证者地址调用合约的认证方法——————
+ *     2. 合约验证认证者地址，并返回认证者地址
  */
 
 describe('SiweAuth Sapphire_localnet', function () {
@@ -48,12 +48,12 @@ describe('SiweAuth Sapphire_localnet', function () {
     let accounts: TestAccounts;
     let network: any;
     
-    // Contract instances
+    // 合约实例
     let siweAuthContract: any;
     let contractFactory: any;
     let contractAddress: string;
 
-    // Connected contract instances
+    // 连接的合约实例
     let contract_admin: any;
     let contract_adminOld: any;
     let contract_addr1: any;
@@ -61,15 +61,15 @@ describe('SiweAuth Sapphire_localnet', function () {
     let contract_addr3: any;
     let contract_viewAccount: any;
     
-    // Account variables
+    // 账户变量
     let admin: any;
     let adminNew: any;
     let addr1: any;
-    let addr2: any; // New owner
-    let addr3: any; // Test user
-    let viewAccount: any; // Test user
+    let addr2: any; // 新所有者
+    let addr3: any; // 测试用户
+    let viewAccount: any; // 测试用户
 
-    // Use domain configuration from utility functions
+    // 使用工具函数中的域名配置
     let primaryDomain: string;
     let domain1: string;
     let domain2: string;
@@ -79,80 +79,80 @@ describe('SiweAuth Sapphire_localnet', function () {
     let domainTest: string ;
     let domainTest2: string ;
 
-    // Local testnet configuration
+    // 本地测试网配置
     const LOCALNET_CONFIG = {
         chainId: 23293, // sapphire_localnet
-        timeout: 5000 // Increase timeout to 5 seconds
+        timeout: 5000 // 增加超时时间到5秒
     };
 
     const sleepTime = 1000;
 
     before(async function () {
-        this.timeout(60000); // Increase timeout
+        this.timeout(60000); // 增加超时时间
         
-        console.log("🚀 Starting SiweAuth contract test - configuring test environment...");
+        console.log("🚀 开始SiweAuth合约测试——配置测试环境...");
 
         hre = require("hardhat");
-        // Switch to Sapphire testnet
+        // 切换到Sapphire测试网
         await hre.switchNetwork("sapphire_localnet");
         
-        // Get network configuration
+        // 获取网络配置
         network = await ethers.provider.getNetwork();
-        console.log("🌐 Current network:", network.networkName, "Chain ID:", network.chainId);
-        console.log("🌐 Target network ID:", LOCALNET_CONFIG.chainId);
+        console.log("🌐 当前网络:", network.networkName, "链ID:", network.chainId);
+        console.log("🌐 目标网络ID:", LOCALNET_CONFIG.chainId);
         
         // if (network.chainId !== LOCALNET_CONFIG.chainId) {
-        //     throw new Error(`Network mismatch! Current: ${network.chainId}, Expected: ${LOCALNET_CONFIG.chainId}`);
+        //     throw new Error(`网络不匹配！当前: ${network.chainId}, 期望: ${LOCALNET_CONFIG.chainId}`);
         // }
 
-        // Get test accounts
+        // 获取测试账户
         accounts = await getAccount(network.chainId);
-        console.log("👤 Test accounts obtained");
+        console.log("👤 测试账户已获取");
 
-        // Initialize domain configuration
+        // 初始化域名配置
         [primaryDomain, domain1, domain2, domain3, domain4, invalidDomain, domainTest, domainTest2] = domainList;
         
-        // Deploy SiweAuth contract
-        console.log("🚀 Deploying SiweAuth contract...");
+        // 部署SiweAuth合约
+        console.log("🚀 部署SiweAuth合约...");
         contractFactory = await ethers.getContractFactory("contracts/SiweAuth.sol:SiweAuth");
         
-        // Construct domain array (excluding invalid domains)
+        // 构造域名数组（排除无效域名）
         const validDomains = [domain1, domain2, domain3, domain4];
         
         siweAuthContract = await contractFactory.deploy(
-            ethers.ZeroAddress, // addrManager_ - temporarily use zero address
+            ethers.ZeroAddress, // addrManager_ - 暂时使用零地址
             primaryDomain,      // primaryDomain
-            validDomains        // domains array
+            validDomains        // domains数组
         );
-        // Wait for deployment to complete
+        // 等待部署完成
         await siweAuthContract.waitForDeployment();
         contractAddress = await siweAuthContract.getAddress();
-        console.log("✅ SiweAuth deployed successfully, address:", contractAddress);
+        console.log("✅ SiweAuth部署成功，地址:", contractAddress);
 
-        // Set account variables
+        // 设置账户变量
         addr1 = accounts.admin;
         addr2 = accounts.minter;
         viewAccount = accounts.buyer;
         addr3 = accounts.buyer2;
 
-        console.log("👤 Test account addresses:");
+        console.log("👤 测试账户地址:");
         console.log("  - addr1:", addr1.address);
         console.log("  - addr2:", addr2.address);
         console.log("  - addr3:", addr3.address);
 
-        // Connect to deployed contract
+        // 连接到已部署的合约
         contract_addr1 = await connectContract(siweAuthContract, addr1);
         contract_addr2 = await connectContract(siweAuthContract, addr2);
         contract_addr3 = await connectContract(siweAuthContract, addr3);
         contract_viewAccount = await connectContract(siweAuthContract, viewAccount);
         
-        console.log("🔗 Contract connections completed");
+        console.log("🔗 合约连接完成");
         
-        await sleep(sleepTime); // Wait for network synchronization
+        await sleep(sleepTime); // 等待网络同步
     });
     
     async function setValue(currentAdminAddr: any) {
-        console.log("Current admin address:", currentAdminAddr);
+        console.log("当前的admin地址：", currentAdminAddr);
         await sleep(sleepTime);
 
         if (currentAdminAddr == addr1.address) {
@@ -178,7 +178,7 @@ describe('SiweAuth Sapphire_localnet', function () {
     let siweStr3:any;
     let siweStr4:any;
 
-    it('Initial check: Check current admin and set related configuration variables.', async function () {
+    it('初始检查：检查当前的admin, 并设置相关的配置变量。', async function () {
         this.timeout(LOCALNET_CONFIG.timeout);
         
         const currentAdminAddr = await contract_addr1.admin();
@@ -187,34 +187,34 @@ describe('SiweAuth Sapphire_localnet', function () {
 
     })
     
-    it('0. Test initial domain check', async function () {
+    it('0.测试初始域名检查', async function () {
         this.timeout(LOCALNET_CONFIG.timeout);
         
-        console.log("🧪 Testing initial domain configuration...");
+        console.log("🧪 测试初始域名配置...");
         
-        // Test primary domain
+        // 测试主域名
         primaryDomain = await contract_addr1.domain();
         // expect(currentDomain).to.equal(primaryDomain);
-        console.log("✅ Primary domain verification passed:", primaryDomain);
+        console.log("✅ 主域名验证通过:", primaryDomain);
         
-        // Test domain count
+        // 测试域名数量
         const domainCount = await contract_addr1.domainCount();
-        console.log("✅ Domain count verification passed:", domainCount.toString());
+        console.log("✅ 域名数量验证通过:", domainCount.toString());
         
-        // Test all domains
+        // 测试所有域名
         const allDomains = await contract_addr1.allDomains();
         expect(allDomains).to.include(primaryDomain);
         expect(allDomains).to.include(domain1);
         expect(allDomains).to.include(domain2);
         expect(allDomains).to.include(domain3);
         // expect(allDomains).to.include(domain4);
-        console.log("✅ All domains verification passed:", allDomains);
+        console.log("✅ 所有域名验证通过:", allDomains);
 
     })
     
-    it('0. Test initial domain check 2', async function () {
+    it('0.测试初始域名检查2', async function () {
         
-        // Test domain validity
+        // 测试域名有效性
         await sleep(sleepTime);
         expect(await contract_addr1.isDomainValid(primaryDomain)).to.be.true;
         expect(await contract_addr1.isDomainValid(domain1)).to.be.true;
@@ -225,16 +225,16 @@ describe('SiweAuth Sapphire_localnet', function () {
         expect(await contract_addr1.isDomainValid(invalidDomain)).to.be.false;
         expect(await contract_addr1.isDomainValid(domainTest)).to.be.false;
         expect(await contract_addr1.isDomainValid(domainTest2)).to.be.false;
-        console.log("✅ Domain validity verification passed");
+        console.log("✅ 域名有效性验证通过");
     });
 
     // return;
-    it('1. Test multi-domain login', async function () {
+    it('1.测试多域名登录', async function () {
         this.timeout(LOCALNET_CONFIG.timeout);
 
-        console.log("🧪 Testing multi-domain login functionality...");
+        console.log("🧪 测试多域名登录功能...");
 
-        // Test primary domain login
+        // 测试主域名登录
         const siweStrPrimary = await siweMsg({
             domain: primaryDomain,
             signer: addr1
@@ -244,20 +244,22 @@ describe('SiweAuth Sapphire_localnet', function () {
             await erc191sign(siweStrPrimary, addr1),
         );
         expect(primaryToken).to.have.length.greaterThan(2);
-        console.log("✅ Primary domain login successful:", primaryDomain);
+        console.log("✅ 主域名登录成功:", primaryDomain);
 
         const tx = await contract_viewAccount.getMsgSender(primaryToken)
-        console.log("Returned authenticator address:", tx);
+        console.log("返回验证者地址:", tx);
         
         expect(tx).to.equal(addr1.address);
 
+        // 存储token供后续测试使用
         siweStr = siweStrPrimary;
 
     })
 
     
-    it('1.2 Test multi-domain login 1', async function () {
+    it('1.2测试多域名登录', async function () {
 
+        // 测试domain1登录
         const siweStr1 = await siweMsg({
             domain: domain1,
             signer: addr1
@@ -267,12 +269,13 @@ describe('SiweAuth Sapphire_localnet', function () {
             await erc191sign(siweStr1, addr1),
         );
         expect(token1).to.have.length.greaterThan(2);
-        console.log("✅ Domain 1 login successful:", domain1);
+        console.log("✅ 域名1登录成功:", domain1);
 
     })
     
-    it('1.3 Test multi-domain login 2', async function () {
+    it('1.3测试多域名登录', async function () {
 
+        // 测试domain2登录
         const siweStr2 = await siweMsg({
             domain: domain2,
             signer: addr1
@@ -282,12 +285,13 @@ describe('SiweAuth Sapphire_localnet', function () {
             await erc191sign(siweStr2, addr1),
         );
         expect(token2).to.have.length.greaterThan(2);
-        console.log("✅ Domain 2 login successful:", domain2);
+        console.log("✅ 域名2登录成功:", domain2);
 
     })
     
-    it('1.4 Test multi-domain login 3', async function () {
+    it('1.4测试多域名登录', async function () {
 
+        // 测试domain3登录
         const siweStr3 = await siweMsg({
             domain: domain3,
             signer: addr1
@@ -297,14 +301,15 @@ describe('SiweAuth Sapphire_localnet', function () {
             await erc191sign(siweStr3, addr1),
         );
         expect(token3).to.have.length.greaterThan(2);
-        console.log("✅ Domain 3 login successful:", domain3);
+        console.log("✅ 域名3登录成功:", domain3);
 
     });
 
 
-    it('1.5 Test invalid-expired domain login', async function () {
+    it('1.5 测试无效-过期域名登录', async function () {
         this.timeout(LOCALNET_CONFIG.timeout);
 
+        // 测试无效域名登录应该失败
         const siweStrInvalid = await siweMsg({
             domain: invalidDomain,
             signer: addr1
@@ -315,13 +320,14 @@ describe('SiweAuth Sapphire_localnet', function () {
                 await erc191sign(siweStrInvalid, addr1),
             );
         } catch (error) {
-            console.log("✅ Invalid domain login correctly rejected:", invalidDomain);
+            console.log("✅ 无效域名登录被正确拒绝:", invalidDomain);
         }
 
+        // 测试过期登录应该失败
         const siweStrExpired = await siweMsg({
             domain: primaryDomain,
             signer: addr1,
-            expiration: new Date(Date.now() - 30_000) // 30 seconds ago expired
+            expiration: new Date(Date.now() - 30_000) // 30秒前过期
         });
 
         try {
@@ -330,25 +336,25 @@ describe('SiweAuth Sapphire_localnet', function () {
                 await erc191sign(siweStrExpired, addr1),
             );
         } catch (error) {
-            console.log("✅ Expired login correctly rejected");
+            console.log("✅ 过期登录被正确拒绝");
         }
         
         
     });
 
-    it('2. Test domain management, add domain', async function () {
+    it('2.测试域名管理,添加域名', async function () {
         // this.timeout(TESTNET_CONFIG.timeout);
 
-        console.log("🧪 Testing domain management functionality...");
+        console.log("🧪 测试域名管理功能...");
 
-        // Test adding new domain - if already added, no need to add again
+        // 测试添加新域名- 已添加了，就无需再添加
         await contract_admin.addDomain(domainTest2); // write
         await sleep(sleepTime);
 
         expect(await contract_addr1.isDomainValid(domainTest2)).to.be.true;
-        console.log("✅ Successfully added new domain:", domainTest2);
+        console.log("✅ 成功添加新域名:", domainTest2);
         
-        // Test new domain login
+        // 测试新域名登录
         const siweStr4 = await siweMsg({
             domain: domainTest2,
             signer: addr1
@@ -358,66 +364,66 @@ describe('SiweAuth Sapphire_localnet', function () {
             await erc191sign(siweStr4, addr1),
         );
         expect(token4).to.have.length.greaterThan(2);
-        console.log("✅ New domain login successful:", domainTest2);
+        console.log("✅ 新域名登录成功:", domainTest2);
         
-        // Test non-admin cannot add domain
+        // 测试非管理员无法添加域名
         try {
-            // NOTE Note that this will also leave interaction records on the blockchain.
+            // NOTE 注意，这个也会在区块链上留下交互记录。
             await contract_adminOld.addDomain("unauthorized.com") // write
         } catch (error) {
-            console.log("✅ Non-admin adding domain correctly rejected");
+            console.log("✅ 非管理员添加域名被正确拒绝");
         }
     });
 
-    it('2.1 Test domain management, remove domain', async function () {
-        // Test removing domain
+    it('2.1测试域名管理,移除域名', async function () {
+        // 测试移除域名
         await contract_admin.removeDomain(domainTest2); // write
         await sleep(sleepTime);
 
         expect(await contract_addr1.isDomainValid(domainTest2)).to.be.false;
-        console.log("✅ Successfully removed domain:", domainTest2);
+        console.log("✅ 成功移除域名:", domainTest2);
         
-        // Test cannot login after removal
+        // 测试移除后无法登录
         try{
             await contract_addr1.login(
                 siweStr4,
                 await erc191sign(siweStr4, addr1),
             );
         } catch (error) {
-            console.log("✅ Cannot login after removal correctly rejected");
+            console.log("✅ 移除后无法登录被正确拒绝");
         }
 
     });
 
-    it('2.2 Test domain management-remove primary domain', async function () {
-        // Test cannot remove primary domain
+    it('2.2测试域名管理-移除主域名', async function () {
+        // 测试无法移除主域名
         try{
             await contract_admin.removeDomain(primaryDomain) // write
         } catch (error) {
-            console.log("✅ Primary domain cannot be removed correctly rejected");
+            console.log("✅ 主域名无法移除被正确拒绝");
         }
         await sleep(sleepTime);
         
-        // Test setting primary domain, note that two call calls must be spaced apart.
+        // 测试设置主域名,注意两个call调用一定要间隔时间。
         await contract_admin.setPrimaryDomain(domain4); // write
         await sleep(sleepTime);
         
         const newPrimaryDomain = await contract_addr1.domain();
         expect(newPrimaryDomain).to.equal(domain4);
-        console.log("✅ Successfully set new primary domain:", domain4);
+        console.log("✅ 成功设置新主域名:", domain4);
         
-        // Restore original primary domain
+        // 恢复原主域名
         await contract_admin.setPrimaryDomain(primaryDomain); // writes
-        console.log("✅ Restored original primary domain:", primaryDomain);
+        console.log("✅ 恢复原主域名:", primaryDomain);
 
     });
 
-    it('3. Test token verification and revocation', async function () {
+    it('3.测试令牌验证和撤销', async function () {
         this.timeout(LOCALNET_CONFIG.timeout);
 
-        console.log("🧪 Testing token verification and revocation functionality...");
+        console.log("🧪 测试令牌验证和撤销功能...");
 
-        // Generate tokens for different domains
+        // 生成不同域名的令牌
         const siweStrPrimary = await siweMsg({
             domain: primaryDomain,
             signer: addr1
@@ -436,48 +442,48 @@ describe('SiweAuth Sapphire_localnet', function () {
             await erc191sign(siweStr1, addr1),
         );
 
-        // Test token validity verification
+        // 测试令牌有效性验证
         expect(await contract_addr1.isSessionValid(primaryToken)).to.be.true;
         expect(await contract_addr1.isSessionValid(token1)).to.be.true;
-        console.log("✅ Token validity verification passed");
+        console.log("✅ 令牌有效性验证通过");
         
-        // Test empty token
+        // 测试空令牌
         expect(await contract_addr1.isSessionValid("0x")).to.be.false;
-        console.log("✅ Empty token verification correctly returns false");
+        console.log("✅ 空令牌验证正确返回false");
         
-        // Test invalid token
+        // 测试错误令牌
         const invalidToken = "0x1234567890abcdef";
         expect(await contract_addr1.isSessionValid(invalidToken)).to.be.false;
-        console.log("✅ Invalid token verification correctly returns false");
+        console.log("✅ 错误令牌验证正确返回false");
     });
 
-    it('4. Test admin permissions', async function () {
-        console.log("🧪 Testing admin permissions...");
+    it('4.测试管理员权限', async function () {
+        console.log("🧪 测试管理员权限...");
         
-        // Test transferring admin permissions - already sent,
+        // 测试转移管理员权限- 已经进行的发送，
         await contract_admin.setAdmin(adminNew.address); // write
-        console.log("✅ Admin permissions transferred to:", adminNew.address);
+        console.log("✅ 管理员权限转移至:", adminNew.address);
 
         await sleep(sleepTime);
-        // Use fixed contract instance to query admin address, avoid variable pointing issues
+        // 使用固定的合约实例来查询管理员地址，避免变量指向问题
         const currentAdminAddr = await contract_viewAccount.admin();
         expect(currentAdminAddr).to.equal(adminNew.address);
 
-        // Adjust variable value,
+        // 调整变量值，
         await setValue(adminNew.address);
     });
 
-    it('4.2 Test admin permissions-new admin', async function () {
+    it('4.2测试管理员权限-新管理员', async function () {
 
-        // New admin can add domain
+        // 新管理员可以添加域名
         await contract_admin.addDomain(domainTest); // write
         await sleep(sleepTime);
 
         expect(await contract_admin.isDomainValid(domainTest)).to.be.true;
-        console.log("✅ New admin successfully added domain");
+        console.log("✅ 新管理员添加域名成功");
 
         await sleep(sleepTime);
-        // Test new domain login
+        // 测试新域名登录
         const siweStr4 = await siweMsg({
             domain: domainTest,
             signer: addr1
@@ -487,80 +493,80 @@ describe('SiweAuth Sapphire_localnet', function () {
             await erc191sign(siweStr4, addr1),
         );
         expect(token4).to.have.length.greaterThan(2);
-        console.log("✅ New domain login successful:", domainTest);
+        console.log("✅ 新域名登录成功:", domainTest);
         
-        // Original admin cannot add domain
+        // 原管理员无法添加域名
         try{
             await contract_adminOld.addDomain("old-admin.com"); // write
         } catch (error) {
-            console.log("✅ Original admin adding domain correctly rejected");
+            console.log("✅ 原管理员添加域名被正确拒绝");
         }
 
     });
 
-    it('4.3 Using newly added domain-test setting primary domain', async function () {
+    it('4.3用新增的域名-测试设置主域名', async function () {
 
         await sleep(sleepTime);
         
-        // Test setting primary domain, note that two call calls must be spaced apart.
+        // 测试设置主域名,注意两个call调用一定要间隔时间。
         await contract_admin.setPrimaryDomain(domainTest); // write
         await sleep(sleepTime);
         
         const newPrimaryDomain = await contract_addr1.domain();
         expect(newPrimaryDomain).to.equal(domainTest);
-        console.log("✅ Successfully set new primary domain:", domainTest);
+        console.log("✅ 成功设置新主域名:", domainTest);
         
-        // Restore original primary domain
+        // 恢复原主域名
         await contract_admin.setPrimaryDomain(primaryDomain); // writes
-        console.log("✅ Restored original primary domain:", primaryDomain);
+        console.log("✅ 恢复原主域名:", primaryDomain);
 
     });
 
-    it('4.4 Test admin permissions-restore admin', async function () {
+    it('4.4测试管理员权限-恢复管理员', async function () {
         
-        // Restore admin permissions
+        // 恢复管理员权限
         await contract_admin.setAdmin(adminNew.address); // write
-        console.log("✅ Admin permissions transferred to:", adminNew.address);
+        console.log("✅ 管理员权限转移至:", adminNew.address);
 
         await sleep(sleepTime);
-        // Use fixed contract instance to query admin address
+        // 使用固定的合约实例来查询管理员地址
         const currentAdminAddr = await contract_viewAccount.admin();
         expect(currentAdminAddr).to.equal(adminNew.address);
 
-        // Adjust variable value,
+        // 调整变量值，
         await setValue(adminNew.address);
     
     });
 
-    it('4.4. New admin-remove previously added domain', async function () {
+    it('4.4.新管理员-移除刚才添加的域名', async function () {
 
         await sleep(sleepTime);
-        // Remove
+        // 移除
         await contract_admin.removeDomain(domainTest); // write
         await sleep(sleepTime);
         
         expect(await contract_addr1.isDomainValid(domainTest)).to.be.false;
-        console.log("✅ Successfully removed domain:", domainTest);
+        console.log("✅ 成功移除域名:", domainTest);
     });
 
-    it('4.5 Using removed domain-test setting primary domain', async function () {
+    it('4.5用移除的域名-测试设置主域名', async function () {
 
         await sleep(sleepTime);
         
         try {
             await contract_admin.setPrimaryDomain(domainTest); // write
         } catch (error) {
-            console.log("❌ Removed domain cannot be set as primary domain:", error);
+            console.log("❌ 移除的域名不能设置主域名:", error);
         }
 
     });
 
-    it('5. Test cross-domain token features', async function () {
+    it('5.测试跨域名令牌特性', async function () {
         this.timeout(LOCALNET_CONFIG.timeout);
 
-        console.log("🧪 Testing cross-domain token features...");
+        console.log("🧪 测试跨域名令牌特性...");
         
-        // Generate tokens for different domains
+        // 为不同域名生成令牌
         const domains = [primaryDomain, domain1, domain2, domain3];
         const tokens = [];
         
@@ -574,32 +580,32 @@ describe('SiweAuth Sapphire_localnet', function () {
                 await erc191sign(siweStr, addr1)
             );
             tokens.push(token);
-            console.log(`✅ Domain ${testDomain} token generated successfully`);
+            console.log(`✅ 域名 ${testDomain} 令牌生成成功`);
         }
         
-        // Verify all tokens are valid
+        // 验证所有令牌都有效
         for (let i = 0; i < tokens.length; i++) {
             expect(await contract_addr1.isSessionValid(tokens[i])).to.be.true;
-            console.log(`✅ Domain ${domains[i]} token validity verification passed`);
+            console.log(`✅ 域名 ${domains[i]} 令牌有效性验证通过`);
         }
         
-        // Verify tokens from different domains are different
+        // 验证不同域名的令牌是不同的
         for (let i = 0; i < tokens.length - 1; i++) {
             for (let j = i + 1; j < tokens.length; j++) {
                 expect(tokens[i]).to.not.equal(tokens[j]);
             }
         }
-        console.log("✅ Tokens generated from different domains are unique");
+        console.log("✅ 不同域名生成的令牌是唯一的");
     });
 
     after(async function () {
-        console.log("\n🎉 MultiDomainSiweAuth localnet test completed");
-        console.log("📍 Contract address:", contractAddress);
-        console.log("🌐 Test network: sapphire-localnet");
+        console.log("\n🎉 MultiDomainSiweAuth localnet测试完成");
+        console.log("📍 合约地址:", contractAddress);
+        console.log("🌐 测试网络: sapphire-localnet");
         if (contract_addr1) {
-            console.log("📊 Multi-domain support:", await contract_addr1.allDomains());
+            console.log("📊 多域名支持:", await contract_addr1.allDomains());
         }
-        console.log("🛡️ Test result: All multi-domain features working correctly");
+        console.log("🛡️ 测试结果: 所有多域名功能正常工作");
     });
 
 });

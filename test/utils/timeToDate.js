@@ -15,12 +15,16 @@ function secondsToDhms(seconds) {
     return [d, h, m, s].map(num => (`0${num}`).slice(-2)).join(':');
 }
 
+// 示例使用
+// const seconds = 3600 * 24 * 365 + 3600 * 15 + 60 * 30 + 45; // 一年零十五天零三十分零四十五秒
+// console.log(secondsToDhms(seconds)); // 将输出 "01:00:00:00"
+
 
 function timestampToDate(timestamp) {
-    // Convert timestamp to milliseconds
+    // 将时间戳乘以1000以转换为毫秒
     const date = new Date(timestamp * 1000);
 
-    // Format date to string (can be customized according to needs)
+    // 格式化日期为字符串（也可以根据需要自定义格式）
     const options = {
         year: 'numeric',
         month: '2-digit',
@@ -31,8 +35,13 @@ function timestampToDate(timestamp) {
         timeZoneName: 'short'
     };
 
-    return date.toLocaleString('en-US', options); // Output English format
+    return date.toLocaleString('zh-CN', options); // 输出中文格式
 }
+
+// 示例使用
+// const timestamp = 1761445254.856; // 例：1761445254.856
+// const dateStr = convertTimestampToDate(timestamp);
+// console.log(dateStr);
 
 module.exports = {
     timestampToDate,
